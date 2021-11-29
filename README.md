@@ -242,6 +242,20 @@ The `pass` statement at the end is just a no-op.
 
 Remember, write test *cases* before you write test *code*.
 
+Before continuing, run this test to make sure everything is set up correctly:
+
+```bash
+$ python3 -m pytest tests
+```
+
+pytest should discover, run, and pass the single test case under the `tests` directory.
+
+*A note about the pytest command:*
+Many online articles and examples use the `pytest` command directly to run tests, like this: `pytest tests`.
+Unfortunately, this version of the command does **not** add the current directory to the Python path.
+If your tests reference anything outside of their test modules, then the command will fail.
+Therefore, I always recommend running the full `python3 -m pytest tests` command.
+
 
 ### Part 2: First steps with Playwright
 
