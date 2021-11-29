@@ -6,7 +6,7 @@ on December 1, 2021.
 The workshop will be done in [Python](python.org).
 
 This README contains full instructions for the workshop.
-That way, you can still take this workshop even if you miss the main event!
+That way, you can still code along to learn Playwright even if you miss the main event!
 
 
 ## Workshop details
