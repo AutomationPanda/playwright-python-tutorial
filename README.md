@@ -20,3 +20,21 @@ The Playwright Workshop for TAU: The Homecoming
    1. Testing different browsers
    2. Capturing screenshots and videos
    3. Running tests in parallel
+
+
+## Part 1: Getting started
+
+```bash
+$ mkdir tau-playwright-workshop
+$ cd tau-playwright-workshop
+$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip3 install playwright
+$ pip3 install pytest
+$ pip3 freeze
+$ playwright install
+```
+
+* Explain virtual environments
+
+
