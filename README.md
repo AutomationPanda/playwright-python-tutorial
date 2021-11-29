@@ -198,6 +198,7 @@ websockets==10.1
 ```
 
 Notice that pip fetches dependencies of dependencies.
+It is customary for Python projects to store this list of dependencies in a file named `requirements.txt`.
 
 After the Python packages are installed, we need to install the browsers for Playwright.
 The `playwright install` command installs the latest versions of the three browsers that Playwright supports:
