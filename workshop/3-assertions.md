@@ -196,4 +196,57 @@ Rerun the test to make sure things still pass.
 
 ## Checking the title
 
-TBD
+The final test step is, "And the search result title contains the phrase".
+Thankfully, this one will be short.
+
+The page title is an attribute of the page.
+It is not associated with any element on the page.
+We can use the [`title`](https://playwright.dev/python/docs/api/class-page#page-title) method
+to access it directly.
+
+Add the following line to the test:
+
+```python
+    assert 'panda' in page.title()
+```
+
+This will make sure the search phrase appears in the page title.
+Be cautious about when to check the page title.
+Make sure the page is fully loaded first.
+
+The full test case should now look like this:
+
+```python
+def test_basic_duckduckgo_search(page):
+
+    # Given the DuckDuckGo home page is displayed
+    page.goto('https://www.duckduckgo.com')
+
+    # When the user searches for a phrase
+    page.fill('#search_form_input_homepage', 'panda')
+    page.click('#search_button_homepage')
+
+    # Then the search result query is the phrase
+    assert 'panda' == page.input_value('#search_form_input')
+
+    # And the search result links pertain to the phrase
+    page.locator('.result__title a.result__a >> nth=4').wait_for()
+    titles = page.locator('.result__title a.result__a').all_text_contents()
+    matches = [t for t in titles if 'panda' in t.lower()]
+    assert len(matches) > 0
+
+    # And the search result title contains the phrase
+    assert 'panda' in page.title()
+```
+
+We can remove the `pass` statement at the end now.
+
+Rerun the test again to make sure it works.
+If it does, congrats!
+You have just completed a full test case in Python using Playwright with pytest.
+
+Notice how concise this code is.
+Unfortunately, it's not very reusable.
+If other tests needed to perform DuckDuckGo searches,
+they would duplicate similar calls.
+In the next workshop part, we will refactor this test using page objects to make the code more reusable and extendable.
