@@ -54,12 +54,12 @@ This workshop has five main parts:
    3. Test project setup
 2. First steps with Playwright
    1. Raw Playwright calls
-3. Refactoring using page objects
-   1. The search page
-4. Writing assertions
+3. Writing assertions
    1. Checking the search field
    2. Checking the result links
    3. Checking the title
+4. Refactoring using page objects
+   1. The search page
 5. Nifty Playwright tricks
    1. Testing different browsers
    2. Capturing screenshots and videos
@@ -76,9 +76,9 @@ The branch names are:
 | ------ | ------------------- |
 | Start  | 0-initial-project   |
 | Part 1 | 1-getting-started   |
-| Part 2 | 2-raw-playwright    |
-| Part 3 | 3-page-objects      |
-| Part 4 | 4-assertions        |
+| Part 2 | 2-first-steps       |
+| Part 3 | 3-assertions        |
+| Part 4 | 4-page-objects      |
 | Part 5 | 5-playwright-tricks |
 
 
@@ -473,12 +473,12 @@ Rerun the test using `python3 -m pytest tests --headed --slowmo 1000`.
 Now, you should see the test actually perform the search!
 
 
-### Part 3: Refactoring using page objects
+### Part 3: Writing assertions
 
 TBD
 
 
-### Part 4: Writing assertions
+### Part 4: Refactoring using page objects
 
 TBD
 
