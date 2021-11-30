@@ -342,7 +342,7 @@ def test_basic_duckduckgo_search(page):
 ```
 
 If you are familiar with Selenium WebDriver, then this command probably looks similar to the `driver.get(...)` method.
-However, Playwright's `goto` method is more sophisticated:
+However, Playwright's [`goto`](https://playwright.dev/python/docs/api/class-page#page-goto) method is more sophisticated:
 it waits for the page to fire the `load` event.
 Selenium WebDriver does not automatically wait for any event,
 which frequently leads to race conditions that cause flaky tests.
@@ -361,34 +361,116 @@ Let's try running our test to make sure Playwright works.
 Launch pytest using the following command:
 
 ```bash
-$ python3 -m pytest tests --headed
+$ python3 -m pytest tests --headed --slowmo 1000
 ```
 
-This invocation has a new argument: `--headed`.
+This invocation has two new arguments.
+The first one is `--headed`.
 By default, Playwright runs tests in *headless* mode, in which the browser is not visibly rendered.
 Headless mode is faster than headed mode and thus ideal for "real" testing (like in CI).
 However, *headed* mode is better when developing tests so that you can see what is happening.
 
+The second new argument is `--slowmo`.
+By default, Playwright runs interactions as fast as it can.
+Again, this is great for "real" testing, but it might be too fast for humans to watch when developing and debugging.
+The `--slowmo` option lets the caller set a hard sleep time after every Playwright call.
+For example, `--slowmo 1000` will pause execution for 1 second (1000 ms) after each call.
+This option is a much better way to slow down tests than to add `time.sleep(...)` calls everywhere!
+
 When you launch pytest, Chromium should pop up, navigate to the DuckDuckGo home page, and close.
-It should all happen very quickly.
-If you want the test to pause after loading the DuckDuckGo home page so that you can actually see it,
-temporarily add the following lines after the `goto` call:
-
-```python
-import time
-time.sleep(5)
-```
-
+Try running it with and without the `--headed` and `--slowmo` options, too.
 Verify that Playwright calls work and the test passes before moving on.
 
+Next, let's try to interact with page elements.
+Playwright is able to locate any element on the page using [selectors](https://playwright.dev/python/docs/selectors).
+Out of the box, Playwright supports the following types of selectors:
 
-TBD
+* Text
+* CSS
+* XPath
+* N-th element
+* React
+* Vue
 
-* pytest fixtures
-* Playwright API
-* load a page
-* fill and click
-* run
+Text and CSS selectors also pierce the Shadow DOM by default!
+
+In general, you should keep selectors as simple as possible.
+Try to stick to text, IDs, or CSS selectors.
+Use more complicated selectors only as necessary.
+
+This workshop will not cover recommended practices for element selectors deeply.
+If you want to learn more about selectors,
+read the [Element selectors](https://playwright.dev/python/docs/selectors) page in the Playwright docs,
+or take the [Web Element Locator Strategies](https://testautomationu.applitools.com/web-element-locator-strategies/) course
+from [Test Automation University](https://testautomationu.applitools.com/).
+
+The next step in our test case is, "When the user searches for a phrase".
+This is actually a compound interaction with two parts:
+
+1. Entering text into the search input field
+2. Clicking the search button
+
+Let's start with the first part of the interaction: entering text into the search input field.
+We need to find a selector for the search input.
+One of the best ways to find selectors is to inspect elements through Chrome DevTools.
+In Chrome, simply right-click any page and select "Inspect" to open DevTools.
+
+Here's the inspection panel for the search input element:
+
+![Inspecting the search input element](images/inspect-search-input.png)
+
+Thankfully, this element has an ID.
+We can use the selector `#search_form_input_homepage` to uniquely identify this element.
+
+To enter text into this input element, we must use Playwright's
+[`fill`](https://playwright.dev/python/docs/api/class-page#page-fill) method.
+Append the following line to the test case:
+
+```python
+    page.fill('#search_form_input_homepage', 'panda')
+```
+
+Using Selenium WebDriver, we would need to locate the element and then send the interaction to it.
+However, in Playwright, these two parts are combined into a single call.
+We are arbitrarily using the phrase `'panda'` as our search phrase because, well, why not?
+
+Let's handle the second part of the interaction: clicking the search button.
+Here's the inspection panel for the search button:
+
+![Inspecting the search button element](images/inspect-search-button.png)
+
+This element also has an ID: `#search_button_homepage`. Nice!
+
+To click an element, we must use Playwright's
+[`click`](https://playwright.dev/python/docs/api/class-page#page-click) method.
+Append the following line to the test case:
+
+```python
+    page.click('#search_button_homepage')
+```
+
+Again, Playwright is nice and concise.
+
+Our test case should now look like this:
+
+```python
+def test_basic_duckduckgo_search(page):
+
+    # Given the DuckDuckGo home page is displayed
+    page.goto('https://www.duckduckgo.com')
+
+    # When the user searches for a phrase
+    page.fill('#search_form_input_homepage', 'panda')
+    page.click('#search_button_homepage')
+
+    # Then the search result query is the phrase
+    # And the search result links pertain to the phrase
+    # And the search result title contains the phrase
+    pass
+```
+
+Rerun the test using `python3 -m pytest tests --headed --slowmo 1000`.
+Now, you should see the test actually perform the search!
 
 
 ### Part 3: Refactoring using page objects
