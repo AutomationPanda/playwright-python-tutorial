@@ -296,9 +296,9 @@ Typically, we would need the following Playwright calls to set up a browser, bro
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
-   browser = p.chromium.launch()
-   context = browser.new_context()
-   page = context.new_page()
+    browser = p.chromium.launch()
+    context = browser.new_context()
+    page = context.new_page()
 ```
 
 However, the `pytest-playwright` plugin takes care of these things automatically with the following fixtures:
@@ -335,7 +335,8 @@ Let's [navigate](https://playwright.dev/python/docs/navigations) to the DuckDuck
 
 ```python
 def test_basic_duckduckgo_search(page):
-   page.goto('https://www.duckduckgo.com')
+    # Given the DuckDuckGo home page is displayed
+    page.goto('https://www.duckduckgo.com')
 ```
 
 If you are familiar with Selenium WebDriver, then this command probably looks similar to the `driver.get(...)` method.
@@ -348,7 +349,8 @@ In Playwright, you can also wait for other page events like this:
 
 ```python
 def test_basic_duckduckgo_search(page):
-   page.goto('https://www.duckduckgo.com', wait_until='networkidle')
+    # Given the DuckDuckGo home page is displayed
+    page.goto('https://www.duckduckgo.com', wait_until='networkidle')
 ```
 
 For our test, however, the default `load` event will suffice.
