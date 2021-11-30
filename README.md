@@ -184,7 +184,10 @@ They should look something like this:
 ```bash
 $ pip3 freeze
 attrs==21.2.0
+certifi==2021.10.8
+charset-normalizer==2.0.8
 greenlet==1.1.2
+idna==3.3
 iniconfig==1.1.1
 packaging==21.3
 playwright==1.17.0
@@ -193,7 +196,13 @@ py==1.11.0
 pyee==8.2.2
 pyparsing==3.0.6
 pytest==6.2.5
+pytest-base-url==1.4.2
+pytest-playwright==0.2.2
+python-slugify==5.0.2
+requests==2.26.0
+text-unidecode==1.3
 toml==0.10.2
+urllib3==1.26.7
 websockets==10.1
 ```
 
