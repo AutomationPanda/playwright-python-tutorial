@@ -58,6 +58,7 @@ This workshop has five main parts:
 4. Refactoring using page objects
    1. The search page
    2. The result page
+   3. Page object fixtures
 5. Nifty Playwright tricks
    1. Testing different browsers
    2. Capturing screenshots and videos
