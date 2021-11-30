@@ -74,7 +74,124 @@ The test should still pass.
 
 ## Checking the result links
 
-TBD
+The next test step is, "And the search result links pertain to the phrase".
+It makes sure that the result links returned actually relate to the search phrase entered.
+An easy way to check this is to make sure the phrase appears in some of the result link titles.
+This will only work for simple phrases (one or two words with no punctuation),
+and not every result link may have a match.
+Nevertheless, our test is a basic search test,
+so its scope should cover only the most basic aspects of searching behavior.
+We would need to write other, more advanced tests if we wanted to use sharper assertions.
+
+Typically, elements in a list share a common DOM structure and common CSS classes.
+Here's the inspection panel for result links:
+
+![Inspecting the result link elements](images/inspect-result-links.png)
+
+Result links are `a` elements with the class `result__a`.
+They are under `h2` elements with the class `result__title`.
+We could use the selector `.result__title a.result__a` to identify all result links on the page.
+(If you look in the DevTools search bar, you'll see that this selector locates 10 elements.)
+
+Since we can get all elements with one selector,
+we can take the following steps to verify that search result links pertain to the phrase:
+
+1. Wait for the first few result links to appear on the page.
+2. Scrape the text contents of the result link titles.
+3. Filter the titles that contain the search phrase.
+4. Verify that the list of filtered titles is nonempty.
+
+In this case, we *must* do explicit waiting for multiple result links to appear.
+If we try to get text contents without waiting for all targets to appear, then some (or all) might be left out!
+This risk is small, but it is nonzero.
+Always safely mitigate potential race conditions with proper waiting.
+
+Explicit waiting will be tricky.
+Add the following line to the test:
+
+```python
+    page.locator('.result__title a.result__a >> nth=4').wait_for()
+```
+
+Let's break this down:
+
+1. [`locator`](https://playwright.dev/python/docs/api/class-page#page-locator) is a method that returns a
+   [`Locator`](https://playwright.dev/python/docs/api/class-locator) object for the target element.
+   A `Locator` object can make many of the same calls as a page, like clicking and getting text.
+   However, it can also make calls for explicit waiting and calls that target multiple elements.
+2. `.result__title a.result__a` is the selector for the result links.
+3. `>> nth=4` is an [N-th element selector](https://playwright.dev/python/docs/selectors#n-th-element-selector).
+   N-th element selectors are zero-indexed and may be appended to any selector.
+   In this `locator` call, it will fetch the fifth result link element.
+4. [`wait_for`](https://playwright.dev/python/docs/api/class-locator#locator-wait-for)
+   is a method that will wait for the target element to be visible.
+
+In summary, this line will wait for the fifth result link to become visible on the page.
+Why check for the fifth?
+Most DuckDuckGo searches return ten links, but sometimes, they return fewer.
+Waiting for five links to appear should be good enough for our testing purposes.
+
+After the links appear, we can scrape their text contents like this:
+
+```python
+    titles = page.locator('.result__title a.result__a').all_text_contents()
+```
+
+Again, we must use the `locator` method because we want to target a list of elements instead of one.
+This selector does *not* include the N-th element selector because we want to target all result links.
+The [`all_text_contents`](https://playwright.dev/python/docs/api/class-locator#locator-all-text-contents) method
+returns a list containing the text content of each located element.
+After this call, `titles` will be a list of strings of the titles we need to check!
+
+Next, we can filter the list of titles to find the ones that contain the search phrase.
+For proper comparisons, the titles and the search phrase should all be lowercase.
+Add this line to the test:
+
+```python
+    matches = [t for t in titles if 'panda' in t.lower()]
+```
+
+This is a Python [list comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions).
+Basically, it filters `titles` for elements that contain the search phrase.
+If the lowercase version of a title contains the search phrase, then it is added to `matches`.
+Otherwise, it is omitted.
+
+In the best case, all titles will match.
+However, in the real world, some titles may not include the full search phrase.
+Since ours is merely a basic search test, it should verify that at least one title matches.
+Add this assertion to the test:
+
+```python
+    assert len(matches) > 0
+```
+
+The full test case should now look like this:
+
+```python
+def test_basic_duckduckgo_search(page):
+
+    # Given the DuckDuckGo home page is displayed
+    page.goto('https://www.duckduckgo.com')
+
+    # When the user searches for a phrase
+    page.fill('#search_form_input_homepage', 'panda')
+    page.click('#search_button_homepage')
+
+    # Then the search result query is the phrase
+    assert 'panda' == page.input_value('#search_form_input')
+
+    # And the search result links pertain to the phrase
+    page.locator('.result__title a.result__a >> nth=4').wait_for()
+    titles = page.locator('.result__title a.result__a').all_text_contents()
+    matches = [t for t in titles if 'panda' in t.lower()]
+    assert len(matches) > 0
+
+    # And the search result title contains the phrase
+    pass
+```
+
+This step had the most complex code so far, but it still wasn't too bad.
+Rerun the test to make sure things still pass.
 
 
 ## Checking the title
