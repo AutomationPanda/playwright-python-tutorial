@@ -311,6 +311,8 @@ All of the Playwright calls with `pytest-playwright` use the synchronous API ins
 The `browser` fixture has session scope, meaning all tests will share one browser instance.
 The `context` and `page` fixtures have function scope, meaning each test gets new ones.
 Typically, a test will only need to call the `page` fixture directly.
+These fixtures will also automatically clean up everything after testing is complete.
+You do not need to explicitly close the browser.
 
 Let's update our test stub to call the `page` fixture.
 In `tests/test_search.py`, change the test function signature from this:
@@ -355,8 +357,29 @@ def test_basic_duckduckgo_search(page):
 
 For our test, however, the default `load` event will suffice.
 
+Let's try running our test to make sure Playwright works.
+Launch pytest using the following command:
 
+```bash
+$ python3 -m pytest tests --headed
+```
 
+This invocation has a new argument: `--headed`.
+By default, Playwright runs tests in *headless* mode, in which the browser is not visibly rendered.
+Headless mode is faster than headed mode and thus ideal for "real" testing (like in CI).
+However, *headed* mode is better when developing tests so that you can see what is happening.
+
+When you launch pytest, Chromium should pop up, navigate to the DuckDuckGo home page, and close.
+It should all happen very quickly.
+If you want the test to pause after loading the DuckDuckGo home page so that you can actually see it,
+temporarily add the following lines after the `goto` call:
+
+```python
+import time
+time.sleep(5)
+```
+
+Verify that Playwright calls work and the test passes before moving on.
 
 
 TBD
