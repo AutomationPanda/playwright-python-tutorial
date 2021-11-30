@@ -160,6 +160,7 @@ The `test_basic_duckduckgo_search` is merely a stub, but it establishes good pra
 * It can be run immediately.
 
 The `pass` statement at the end is just a no-op.
+It does **not** mean "pass the test".
 
 Remember, write test *cases* before you write test *code*.
 
