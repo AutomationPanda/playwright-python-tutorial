@@ -177,6 +177,7 @@ Append the following line to the test case:
 
 Using Selenium WebDriver, we would need to locate the element and then send the interaction to it.
 However, in Playwright, these two parts are combined into a single call.
+Furthermore, Playwright waits for the target element to be visible and editable before it attempts to enter the text.
 We are arbitrarily using the phrase `'panda'` as our search phrase because, well, why not?
 
 Let's handle the second part of the interaction: clicking the search button.
@@ -195,6 +196,7 @@ Append the following line to the test case:
 ```
 
 Again, Playwright is nice and concise.
+The `click` method waits for the target element to be ready to receive clicks, too.
 
 Our test case should now look like this:
 
