@@ -281,6 +281,72 @@ Below is a diagram illustrating how these three pieces work together:
 
 ![Browser Diagram](images/browser-diagram.png)
 
+Typically, we would need the following Playwright calls to set up a browser, browser context, and page:
+
+```python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+   browser = p.chromium.launch()
+   context = browser.new_context()
+   page = context.new_page()
+```
+
+However, the `pytest-playwright` plugin takes care of these things automatically with the following fixtures:
+
+* The `browser` fixture provides the browser instance launched by Playwright.
+* The `context` fixture provides a new browser context for a test.
+* The `page` fixture provides a new browser page for a test.
+
+All of the Playwright calls with `pytest-playwright` use the synchronous API instead of the async API.
+The `browser` fixture has session scope, meaning all tests will share one browser instance.
+The `context` and `page` fixtures have function scope, meaning each test gets new ones.
+Typically, a test will only need to call the `page` fixture directly.
+
+Let's update our test stub to call the `page` fixture.
+In `tests/test_search.py`, change the test function signature from this:
+
+```python
+def test_basic_duckduckgo_search():
+```
+
+To this:
+
+```python
+def test_basic_duckduckgo_search(page):
+```
+
+Now the test has access to a fresh page in a new browser context.
+If we write multiple tests, each test will get its own page and context,
+but they will all share the same browser instance.
+
+Now that we have a page, let's do something on it!
+Our first test step is, "Given the DuckDuckGo home page is displayed".
+Let's [navigate](https://playwright.dev/python/docs/navigations) to the DuckDuckGo home page like this:
+
+```python
+def test_basic_duckduckgo_search(page):
+   page.goto('https://www.duckduckgo.com')
+```
+
+If you are familiar with Selenium WebDriver, then this command probably looks similar to the `driver.get(...)` method.
+However, Playwright's `goto` method is more sophisticated:
+it waits for the page to fire the `load` event.
+Selenium WebDriver does not automatically wait for any event,
+which frequently leads to race conditions that cause flaky tests.
+
+In Playwright, you can also wait for other page events like this:
+
+```python
+def test_basic_duckduckgo_search(page):
+   page.goto('https://www.duckduckgo.com', wait_until='networkidle')
+```
+
+For our test, however, the default `load` event will suffice.
+
+
+
+
 
 TBD
 
