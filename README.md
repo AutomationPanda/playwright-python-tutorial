@@ -5,16 +5,11 @@ for [TAU: The Homecoming](https://applitools.com/tau-homecoming/)
 on December 1, 2021.
 The workshop will be done in [Python](python.org).
 
-This README contains full instructions for the workshop.
+The `workshop` folder contains full instructions for the workshop.
 That way, you can still code along to learn Playwright even if you miss the main event!
 
 
-## Workshop details
-
-This section contains information about the workshop.
-
-
-### Abstract
+## Abstract
 
 [Playwright](https://playwright.dev/python/)
 is a hot new browser automation tool from Microsoft.
@@ -33,7 +28,7 @@ Come prepared with Python 3.7 or higher installed on your machine.
 By the end of the workshop, you will have a solid foundation in Playwright as well as a Python project you can extend with new tests!
 
 
-### Prerequisites
+## Prerequisites
 
 To code along with this workshop, your machine must have Python 3.7 or higher.
 You should also have a decent Python editor like
@@ -44,7 +39,7 @@ The command line shown in examples below is [bash](https://en.wikipedia.org/wiki
 If you are using a different shell or a Windows command line, some commands may need to be different.
 
 
-### Agenda
+## Agenda
 
 This workshop has five main parts:
 
@@ -53,22 +48,25 @@ This workshop has five main parts:
    2. Our web search test
    3. Test project setup
 2. First steps with Playwright
-   1. Raw Playwright calls
+   1. Browsers, contexts, and pages
+   2. Navigating to a web page
+   3. Performing a search
 3. Writing assertions
    1. Checking the search field
    2. Checking the result links
    3. Checking the title
 4. Refactoring using page objects
    1. The search page
+   2. The result page
 5. Nifty Playwright tricks
    1. Testing different browsers
    2. Capturing screenshots and videos
    3. Running tests in parallel
 
 
-### Example code branches
+## Example code branches
 
-Each part has a corresponding branch in this repository containing the part's example code.
+Each part has a corresponding branch in this repository containing the part's example code and `workshop` instructions.
 The branches allow you to check your progress at any point during the workshop.
 The branch names are:
 
@@ -80,409 +78,3 @@ The branch names are:
 | Part 3 | 3-assertions        |
 | Part 4 | 4-page-objects      |
 | Part 5 | 5-playwright-tricks |
-
-
-## Workshop parts
-
-This section contains the instructions for completing the workshop.
-You can code along with them either during the live workshop event or afterwards on your own.
-
-
-### Part 1: Getting started
-
-
-#### What is Playwright?
-
-[Playwright](https://playwright.dev/python/) is a new library that can automate interactions with Chromium, Firefox, and WebKit browsers via a single API.
-It is an open source project developed by Microsoft.
-
-Playwright is a fantastic alternative to [Selenium WebDriver](https://www.selenium.dev/) for web UI testing.
-Like Selenium WebDriver, Playwright has language bindings in multiple languages: Python, .NET, Java, and JavaScript.
-Playwright also refines many of the pain points in Selenium WebDriver.
-Some examples include:
-
-* Playwright interactions automatically wait for elements to be ready.
-* Playwright can use one browser instance with multiple browser contexts for isolation instead of requiring multiple instances.
-* Playwright has device emulation for testing responsive web apps in mobile browsers.
-
-For a more thorough list of advantages, check out
-[Why Playwright?](https://playwright.dev/python/docs/why-playwright/)
-from the docs.
-
-
-#### Our web search test
-
-For this workshop, we will walk through one test scenario for DuckDuckGo searching.
-[DuckDuckGo](https://duckduckgo.com/) is a search engine like Google or Yahoo.
-
-The steps for a basic DuckDuckGo search are:
-
-```gherkin
-Given the DuckDuckGo home page is displayed
-When the user searches for a phrase
-Then the search result query is the phrase
-And the search result links pertain to the phrase
-And the search result title contains the phrase
-```
-
-Go to [duckduckgo.com](https://duckduckgo.com/) and give this a try.
-You can use any search phrase you like.
-It is important to write a test *case* before writing test *code*.
-It is also important to try a test manually before attempting to automate it.
-
-
-#### Test project setup
-
-Let's set up the test project!
-For this workshop, we will build a new project from the ground up.
-The GitHub repository should be used exclusively as a reference for example code.
-
-Create a directory named `tau-playwright-workshop` for the project:
-
-```bash
-$ mkdir tau-playwright-workshop
-$ cd tau-playwright-workshop
-```
-
-Inside this project, create a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html)
-using the [venv](https://docs.python.org/3/library/venv.html) module
-to manage dependency packages locally:
-
-```bash
-$ python3 -m venv venv
-$ source venv/bin/activate
-```
-
-Creating a new virtual environment for each Python project is a recommended practice.
-This command will create a subdirectory named `venv` that holds all virtual environment files, including dependency packages.
-After creating a virtual environment, you must "activate" it to use it using the `source` command shown above.
-You can tell if a virtual environment is active if its name appears in the bash prompt.
-
-*A note about Python commands:*
-Python has two incompatible major versions: 2 and 3.
-Although Python 2 end-of-life was January 1, 2020, many machines still run it.
-For example, macOS comes bundled with Python 2.7.18.
-Sometimes, the `python` executable may point to Python 2 instead of 3.
-To be precise about versions and executables, we will use the `python3` and `pip3` commands explicitly in this workshop.
-
-Let's add some Python packages to our new virtual environment:
-
-```bash
-$ pip3 install playwright
-$ pip3 install pytest
-$ pip3 install pytest-playwright
-```
-
-By itself, Playwright is simply a library for browser automation.
-We need a test framework like pytest if we want to automate tests.
-The [`pytest-playwright`](https://playwright.dev/python/docs/test-runners)
-is a pytest plugin developed by the Playwright team that simplifies Playwright integration.
-
-You can check all installed packages using `pip3 freeze`.
-They should look something like this:
-
-```bash
-$ pip3 freeze
-attrs==21.2.0
-certifi==2021.10.8
-charset-normalizer==2.0.8
-greenlet==1.1.2
-idna==3.3
-iniconfig==1.1.1
-packaging==21.3
-playwright==1.17.0
-pluggy==1.0.0
-py==1.11.0
-pyee==8.2.2
-pyparsing==3.0.6
-pytest==6.2.5
-pytest-base-url==1.4.2
-pytest-playwright==0.2.2
-python-slugify==5.0.2
-requests==2.26.0
-text-unidecode==1.3
-toml==0.10.2
-urllib3==1.26.7
-websockets==10.1
-```
-
-Notice that pip fetches dependencies of dependencies.
-It is customary for Python projects to store this list of dependencies in a file named `requirements.txt`.
-
-After the Python packages are installed, we need to install the browsers for Playwright.
-The `playwright install` command installs the latest versions of the three browsers that Playwright supports:
-Chromium, Firefox, and WebKit:
-
-```bash
-$ playwright install
-```
-
-By default, pytest with the Playwright plugin will run headless Chromium.
-We will show how to run against other browsers in Part 5.
-
-Finally, let's create a test function stub.
-By Python conventions, all tests should be located under a `tests` directory.
-Create a `tests` directory, and inside, create a file named `test_search.py`:
-
-```bash
-$ mkdir tests
-$ touch tests/test_search.py
-```
-
-Add the following code to `tests/test_search.py`:
-
-```python
-def test_basic_duckduckgo_search():
-    # Given the DuckDuckGo home page is displayed
-    # When the user searches for a phrase
-    # Then the search result query is the phrase
-    # And the search result links pertain to the phrase
-    # And the search result title contains the phrase
-    pass
-```
-
-The `test_basic_duckduckgo_search` is merely a stub, but it establishes good practices:
-
-* It has a clear name.
-* It defines the behavior to test step-by-step in its comments.
-* It can be run immediately.
-
-The `pass` statement at the end is just a no-op.
-
-Remember, write test *cases* before you write test *code*.
-
-Before continuing, run this test to make sure everything is set up correctly:
-
-```bash
-$ python3 -m pytest tests
-```
-
-pytest should discover, run, and pass the single test case under the `tests` directory.
-
-*A note about the pytest command:*
-Many online articles and examples use the `pytest` command directly to run tests, like this: `pytest tests`.
-Unfortunately, this version of the command does **not** add the current directory to the Python path.
-If your tests reference anything outside of their test modules, then the command will fail.
-Therefore, I always recommend running the full `python3 -m pytest tests` command.
-
-
-### Part 2: First steps with Playwright
-
-Before we can automate interactions using Playwright's API, we must first understand how Playwright interacts with browsers.
-There are three main layers to automation: *browsers*, *browser contexts*, and *pages*:
-
-1. A [browser](https://playwright.dev/python/docs/browsers/)
-   is a single instance of a web browser.
-   Playwright will automatically launch a browser instance specified by code or by inputs.
-   Typically, this is either the Chromium, Firefox, or WebKit instance installed via `playwright install`,
-   but it may also be other browsers installed on your local machine.
-2. A [browser context](https://playwright.dev/python/docs/browser-contexts/)
-   is an isolated incognito-alike session within a browser instance.
-   They are fast and cheap to create.
-   One browser may have multiple browser contexts.
-   The recommended practice is for all tests to share one browser instance but for each test to have its own browser context.
-3. A [page](https://playwright.dev/python/docs/pages/)
-   is a single tab or window within a browser context.
-   A browser context may have multiple pages.
-   Typically, an individual test should interact with only one page.
-
-Below is a diagram illustrating how these three pieces work together:
-
-![Browser Diagram](images/browser-diagram.png)
-
-Typically, we would need the following Playwright calls to set up a browser, browser context, and page:
-
-```python
-from playwright.sync_api import sync_playwright
-
-with sync_playwright() as p:
-    browser = p.chromium.launch()
-    context = browser.new_context()
-    page = context.new_page()
-```
-
-However, the `pytest-playwright` plugin takes care of these things automatically with the following fixtures:
-
-* The `browser` fixture provides the browser instance launched by Playwright.
-* The `context` fixture provides a new browser context for a test.
-* The `page` fixture provides a new browser page for a test.
-
-All of the Playwright calls with `pytest-playwright` use the synchronous API instead of the async API.
-The `browser` fixture has session scope, meaning all tests will share one browser instance.
-The `context` and `page` fixtures have function scope, meaning each test gets new ones.
-Typically, a test will only need to call the `page` fixture directly.
-These fixtures will also automatically clean up everything after testing is complete.
-You do not need to explicitly close the browser.
-
-Let's update our test stub to call the `page` fixture.
-In `tests/test_search.py`, change the test function signature from this:
-
-```python
-def test_basic_duckduckgo_search():
-```
-
-To this:
-
-```python
-def test_basic_duckduckgo_search(page):
-```
-
-Now the test has access to a fresh page in a new browser context.
-If we write multiple tests, each test will get its own page and context,
-but they will all share the same browser instance.
-
-Now that we have a page, let's do something on it!
-Our first test step is, "Given the DuckDuckGo home page is displayed".
-Let's [navigate](https://playwright.dev/python/docs/navigations) to the DuckDuckGo home page like this:
-
-```python
-def test_basic_duckduckgo_search(page):
-    # Given the DuckDuckGo home page is displayed
-    page.goto('https://www.duckduckgo.com')
-```
-
-If you are familiar with Selenium WebDriver, then this command probably looks similar to the `driver.get(...)` method.
-However, Playwright's [`goto`](https://playwright.dev/python/docs/api/class-page#page-goto) method is more sophisticated:
-it waits for the page to fire the `load` event.
-Selenium WebDriver does not automatically wait for any event,
-which frequently leads to race conditions that cause flaky tests.
-
-In Playwright, you can also wait for other page events like this:
-
-```python
-def test_basic_duckduckgo_search(page):
-    # Given the DuckDuckGo home page is displayed
-    page.goto('https://www.duckduckgo.com', wait_until='networkidle')
-```
-
-For our test, however, the default `load` event will suffice.
-
-Let's try running our test to make sure Playwright works.
-Launch pytest using the following command:
-
-```bash
-$ python3 -m pytest tests --headed --slowmo 1000
-```
-
-This invocation has two new arguments.
-The first one is `--headed`.
-By default, Playwright runs tests in *headless* mode, in which the browser is not visibly rendered.
-Headless mode is faster than headed mode and thus ideal for "real" testing (like in CI).
-However, *headed* mode is better when developing tests so that you can see what is happening.
-
-The second new argument is `--slowmo`.
-By default, Playwright runs interactions as fast as it can.
-Again, this is great for "real" testing, but it might be too fast for humans to watch when developing and debugging.
-The `--slowmo` option lets the caller set a hard sleep time after every Playwright call.
-For example, `--slowmo 1000` will pause execution for 1 second (1000 ms) after each call.
-This option is a much better way to slow down tests than to add `time.sleep(...)` calls everywhere!
-
-When you launch pytest, Chromium should pop up, navigate to the DuckDuckGo home page, and close.
-Try running it with and without the `--headed` and `--slowmo` options, too.
-Verify that Playwright calls work and the test passes before moving on.
-
-Next, let's try to interact with page elements.
-Playwright is able to locate any element on the page using [selectors](https://playwright.dev/python/docs/selectors).
-Out of the box, Playwright supports the following types of selectors:
-
-* Text
-* CSS
-* XPath
-* N-th element
-* React
-* Vue
-
-Text and CSS selectors also pierce the Shadow DOM by default!
-
-In general, you should keep selectors as simple as possible.
-Try to stick to text, IDs, or CSS selectors.
-Use more complicated selectors only as necessary.
-
-This workshop will not cover recommended practices for element selectors deeply.
-If you want to learn more about selectors,
-read the [Element selectors](https://playwright.dev/python/docs/selectors) page in the Playwright docs,
-or take the [Web Element Locator Strategies](https://testautomationu.applitools.com/web-element-locator-strategies/) course
-from [Test Automation University](https://testautomationu.applitools.com/).
-
-The next step in our test case is, "When the user searches for a phrase".
-This is actually a compound interaction with two parts:
-
-1. Entering text into the search input field
-2. Clicking the search button
-
-Let's start with the first part of the interaction: entering text into the search input field.
-We need to find a selector for the search input.
-One of the best ways to find selectors is to inspect elements through Chrome DevTools.
-In Chrome, simply right-click any page and select "Inspect" to open DevTools.
-
-Here's the inspection panel for the search input element:
-
-![Inspecting the search input element](images/inspect-search-input.png)
-
-Thankfully, this element has an ID.
-We can use the selector `#search_form_input_homepage` to uniquely identify this element.
-
-To enter text into this input element, we must use Playwright's
-[`fill`](https://playwright.dev/python/docs/api/class-page#page-fill) method.
-Append the following line to the test case:
-
-```python
-    page.fill('#search_form_input_homepage', 'panda')
-```
-
-Using Selenium WebDriver, we would need to locate the element and then send the interaction to it.
-However, in Playwright, these two parts are combined into a single call.
-We are arbitrarily using the phrase `'panda'` as our search phrase because, well, why not?
-
-Let's handle the second part of the interaction: clicking the search button.
-Here's the inspection panel for the search button:
-
-![Inspecting the search button element](images/inspect-search-button.png)
-
-This element also has an ID: `#search_button_homepage`. Nice!
-
-To click an element, we must use Playwright's
-[`click`](https://playwright.dev/python/docs/api/class-page#page-click) method.
-Append the following line to the test case:
-
-```python
-    page.click('#search_button_homepage')
-```
-
-Again, Playwright is nice and concise.
-
-Our test case should now look like this:
-
-```python
-def test_basic_duckduckgo_search(page):
-
-    # Given the DuckDuckGo home page is displayed
-    page.goto('https://www.duckduckgo.com')
-
-    # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
-
-    # Then the search result query is the phrase
-    # And the search result links pertain to the phrase
-    # And the search result title contains the phrase
-    pass
-```
-
-Rerun the test using `python3 -m pytest tests --headed --slowmo 1000`.
-Now, you should see the test actually perform the search!
-
-
-### Part 3: Writing assertions
-
-TBD
-
-
-### Part 4: Refactoring using page objects
-
-TBD
-
-
-### Part 5: Nifty Playwright tricks
-
-TBD
