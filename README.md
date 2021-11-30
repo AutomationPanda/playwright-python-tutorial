@@ -259,7 +259,36 @@ Therefore, I always recommend running the full `python3 -m pytest tests` command
 
 ### Part 2: First steps with Playwright
 
+Before we can automate interactions using Playwright's API, we must first understand how Playwright interacts with browsers.
+There are three main layers to automation: *browsers*, *browser contexts*, and *pages*:
+
+1. A [browser](https://playwright.dev/python/docs/browsers/)
+   is a single instance of a web browser.
+   Playwright will automatically launch a browser instance specified by code or by inputs.
+   Typically, this is either the Chromium, Firefox, or WebKit instance installed via `playwright install`,
+   but it may also be other browsers installed on your local machine.
+2. A [browser context](https://playwright.dev/python/docs/browser-contexts/)
+   is an isolated incognito-alike session within a browser instance.
+   They are fast and cheap to create.
+   One browser may have multiple browser contexts.
+   The recommended practice is for all tests to share one browser instance but for each test to have its own browser context.
+3. A [page](https://playwright.dev/python/docs/pages/)
+   is a single tab or window within a browser context.
+   A browser context may have multiple pages.
+   Typically, an individual test should interact with only one page.
+
+Below is a diagram illustrating how these three pieces work together:
+
+![Browser Diagram](images/browser-diagram.png)
+
+
 TBD
+
+* pytest fixtures
+* Playwright API
+* load a page
+* fill and click
+* run
 
 
 ### Part 3: Refactoring using page objects
