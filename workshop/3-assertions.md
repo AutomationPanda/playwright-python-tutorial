@@ -67,7 +67,7 @@ the `input_value` method performs *implicit* waiting for the element to be ready
 Check the [Auto-waiting](https://playwright.dev/python/docs/actionability) page
 for a full list of actionability checks for each interaction.
 
-Rerun the test using the same pytest command (`python3 -m pytest tests --headed --slowmo 1000).
+Rerun the test using the same pytest command (`python3 -m pytest tests --headed --slowmo 1000`).
 This time, you should see the result page for a good second or two before the browser window closes.
 The test should still pass.
 

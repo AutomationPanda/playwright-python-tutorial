@@ -1,6 +1,6 @@
 # Part 1: Getting started
 
-Part 1 of the workshop explains how to start testing with Playwright and pytest in Python.
+Part 1 of the workshop explains how to set up a Python test automation project with pytest and Playwright.
 
 
 ## What is Playwright?
@@ -62,13 +62,10 @@ to manage dependency packages locally:
 
 ```bash
 $ python3 -m venv venv
-$ source venv/bin/activate
 ```
 
 Creating a new virtual environment for each Python project is a recommended practice.
 This command will create a subdirectory named `venv` that holds all virtual environment files, including dependency packages.
-After creating a virtual environment, you must "activate" it to use it using the `source` command shown above.
-You can tell if a virtual environment is active if its name appears in the bash prompt.
 
 *A note about Python commands:*
 Python has two incompatible major versions: 2 and 3.
@@ -76,6 +73,21 @@ Although Python 2 end-of-life was January 1, 2020, many machines still run it.
 For example, macOS comes bundled with Python 2.7.18.
 Sometimes, the `python` executable may point to Python 2 instead of 3.
 To be precise about versions and executables, we will use the `python3` and `pip3` commands explicitly in this workshop.
+
+After creating a virtual environment, you must "activate" it.
+On macOS or Linux, use the following command:
+
+```bash
+$ source venv/bin/activate
+```
+
+The equivalent command for a Windows command line is:
+
+```
+> venv\Scripts\activate.bat
+```
+
+You can tell if a virtual environment is active if its name appears in the prompt.
 
 Let's add some Python packages to our new virtual environment:
 
