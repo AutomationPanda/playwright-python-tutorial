@@ -46,9 +46,9 @@ However, the `pytest-playwright` plugin takes care of these things automatically
 * The `context` fixture provides a new browser context for a test.
 * The `page` fixture provides a new browser page for a test.
 
-All of the Playwright calls with `pytest-playwright` use the synchronous API instead of the async API.
-The `browser` fixture has session scope, meaning all tests will share one browser instance.
-The `context` and `page` fixtures have function scope, meaning each test gets new ones.
+All the Playwright calls with `pytest-playwright` use the synchronous API instead of the async API.
+The `browser` fixture has *session* scope, meaning all tests will share one browser instance.
+The `context` and `page` fixtures have *function* scope, meaning each test gets new ones.
 Typically, a test will only need to call the `page` fixture directly.
 These fixtures will also automatically clean up everything after testing is complete.
 You do not need to explicitly close the browser.
@@ -66,12 +66,12 @@ To this:
 def test_basic_duckduckgo_search(page):
 ```
 
-
-## Navigating to a web page
-
 Now the test has access to a fresh page in a new browser context.
 If we write multiple tests, each test will get its own page and context,
 but they will all share the same browser instance.
+
+
+## Navigating to a web page
 
 Now that we have a page, let's do something on it!
 Our first test step is, "Given the DuckDuckGo home page is displayed".
