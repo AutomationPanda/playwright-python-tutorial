@@ -3,7 +3,7 @@
 This repository contains the instructions and example code for the Playwright workshop
 for [TAU: The Homecoming](https://applitools.com/tau-homecoming/)
 on December 1, 2021.
-The workshop will be done in [Python](python.org).
+The workshop will be done in [Python](https://www.python.org/).
 
 
 ## Instructions
@@ -23,12 +23,12 @@ Feel free to open issues against this repository if you have any trouble complet
 is a hot new browser automation tool from Microsoft.
 With bindings for .NET, Java, JavaScript, and Python, it’s a strong alternative to Selenium WebDriver for end-to-end web app testing.
 
-This workshop will be an introduction to Playwright using [Python](python.org).
+This workshop will be an introduction to Playwright using [Python](https://www.python.org/).
 We will automate a test scenario together that performs a [DuckDuckGo](https://duckduckgo.com/) search.
 As we code along the test together, we will learn:
 
 * How to install and configure Playwright
-* How to integrate Playwright with [pytest](pytest.org), Python’s leading test framework
+* How to integrate Playwright with [pytest](https://docs.pytest.org/), Python’s leading test framework
 * How to perform interactions through page objects
 * How to conveniently run different browsers, capture videos, and run tests in parallel
 
