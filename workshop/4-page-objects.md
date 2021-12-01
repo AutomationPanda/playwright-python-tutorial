@@ -185,5 +185,141 @@ Now, it just uses a page object for the search page instead of raw calls.
 
 ## The result page
 
+After writing the search page class, the result page class will be straightforward.
+It will follow the same structure.
+The main difference is that each interaction methods in the result page class will return a value
+because test assertions will check page values.
+
+Start by adding the class definition to `pages/result.py`:
+
+```python
+class DuckDuckGoResultPage:
+```
+
+Add the selectors we used in the test case:
+
+```python
+    RESULT_LINKS = '.result__title a.result__a'
+    SEARCH_INPUT = '#search_form_input'
+```
+
+Add dependency injection:
+
+```python
+    def __init__(self, page):
+        self.page = page
+```
+
+Now, let's add interaction methods for all the things assertions must check.
+The first assertion checked the input value of the search input.
+Let's add a method to get and return that input value:
+
+```python
+    def search_input_value(self):
+        return self.page.input_value(self.SEARCH_INPUT)
+```
+
+The second assertion was the most complex.
+It checked if at least one result link title contained the search phrase.
+We can break this down into two methods:
+
+1. A method to get all result link titles as a list.
+2. A method to check if the list of result link titles contains a phrase.
+
+Add the following methods to the class:
+
+```python
+    def result_link_titles(self):
+        self.page.locator(f'{self.RESULT_LINKS} >> nth=4').wait_for()
+        titles = self.page.locator(self.RESULT_LINKS).all_text_contents()
+        return titles
+    
+    def result_link_titles_contain_phrase(self, phrase, minimum=1):
+        titles = self.result_link_titles()
+        matches = [t for t in titles if phrase.lower() in t.lower()]
+        return len(matches) >= minimum
+```
+
+In the first method, the `RESULT_LINKS` selector is used twice.
+The first time it is used, it is concatenated with the N-th element selector using an
+[f-string](https://realpython.com/python-f-strings/).
+
+The second method takes in a search phases and a minimum limit for matches.
+It calls the first method to get the list of titles,
+filters the titles using a list comprehension,
+and returns a Boolean value indicating if the number of matches meets the minimum threshold.
+Notice that this method does **not** perform an asssertion.
+Assertions should *not* be done in page objects.
+They should only be done in test cases.
+
+The third assertion checked the page title.
+Let's add one final method to the result page class to get the title:
+
+```python
+    def title(self):
+        return self.page.title()
+```
+
+The full code for `pages/result.py` should look like this
+(after rearranging methods alphabetically):
+
+```python
+class DuckDuckGoResultPage:
+
+    RESULT_LINKS = '.result__title a.result__a'
+    SEARCH_INPUT = '#search_form_input'
+    
+    def __init__(self, page):
+        self.page = page
+    
+    def result_link_titles(self):
+        self.page.locator(f'{self.RESULT_LINKS} >> nth=4').wait_for()
+        titles = self.page.locator(self.RESULT_LINKS).all_text_contents()
+        return titles
+    
+    def result_link_titles_contain_phrase(self, phrase, minimum=1):
+        titles = self.result_link_titles()
+        matches = [t for t in titles if phrase.lower() in t.lower()]
+        return len(matches) >= minimum
+
+    def search_input_value(self):
+        return self.page.input_value(self.SEARCH_INPUT)
+    
+    def title(self):
+        return self.page.title()
+```
+
+After rewriting the original test case to use `DuckDuckGoResultPage`,
+the code in `tests/test_search.py` should look like this:
+
+```python
+from pages.result import DuckDuckGoResultPage
+from pages.search import DuckDuckGoSearchPage
+
+def test_basic_duckduckgo_search(page):
+    search_page = DuckDuckGoSearchPage(page)
+    result_page = DuckDuckGoResultPage(page)
+
+    # Given the DuckDuckGo home page is displayed
+    search_page.load()
+
+    # When the user searches for a phrase
+    search_page.search('panda')
+
+    # Then the search result query is the phrase
+    assert 'panda' == result_page.search_input_value()
+
+    # And the search result links pertain to the phrase
+    assert result_page.result_link_titles_contain_phrase('panda')
+
+    # And the search result title contains the phrase
+    assert 'panda' in result_page.title()
+```
+
+These calls look less "code-y" than the raw Playwright calls.
+They read much more like a test case.
+
+Rerun the test again to make sure everything is still working.
+
 
 ## Page object fixtures
