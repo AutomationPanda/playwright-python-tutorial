@@ -71,11 +71,12 @@ Each part has a corresponding branch in this repository containing the part's ex
 The branches allow you to check your progress at any point during the workshop.
 The branch names are:
 
-| Part   | Branch              |
-| ------ | ------------------- |
-| Start  | 0-initial-project   |
-| Part 1 | 1-getting-started   |
-| Part 2 | 2-first-steps       |
-| Part 3 | 3-assertions        |
-| Part 4 | 4-page-objects      |
-| Part 5 | 5-playwright-tricks |
+| Part     | Branch              |
+| ------   | ------------------- |
+| Start    | 0-initial-project   |
+| Part 1   | 1-getting-started   |
+| Part 2   | 2-first-steps       |
+| Part 3   | 3-assertions        |
+| Part 4   | 4-page-objects      |
+| Part 5   | 5-playwright-tricks |
+| Complete | main                |
