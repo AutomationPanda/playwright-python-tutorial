@@ -2,13 +2,7 @@
 These tests cover DuckDuckGo searches.
 """
 
-from pages.result import DuckDuckGoResultPage
-from pages.search import DuckDuckGoSearchPage
-
-
-def test_basic_duckduckgo_search(page):
-    search_page = DuckDuckGoSearchPage(page)
-    result_page = DuckDuckGoResultPage(page)
+def test_basic_duckduckgo_search(search_page, result_page):
 
     # Given the DuckDuckGo home page is displayed
     search_page.load()

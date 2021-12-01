@@ -323,3 +323,75 @@ Rerun the test again to make sure everything is still working.
 
 
 ## Page object fixtures
+
+There is one more thing we can do to maximize the value of our new page objects:
+we can create fixtures to automatically construct them!
+In our current test, we construct them explicitly inside the test function.
+If we add more test functions in the future, that construction code will become repetitive.
+Page object fixtures will help our code stay concise.
+
+In pytest, shared fixtures belong in a module under the `tests` directory named `conftest.py`.
+Create `tests/conftest.py` and add the following code:
+
+```python
+import pytest
+
+from pages.result import DuckDuckGoResultPage
+from pages.search import DuckDuckGoSearchPage
+
+
+@pytest.fixture
+def result_page(page):
+    return DuckDuckGoResultPage(page)
+
+
+@pytest.fixture
+def search_page(page):
+    return DuckDuckGoSearchPage(page)
+```
+
+The two fixtures, `result_page` and `search_page`,
+each call the Playwright `page` fixture and use it to construct a page object.
+Just like `page`, they have function scope.
+If both page object fixtures are called for the same test
+(like we will do for `test_basic_duckduckgo_search`),
+then they will both receive the same `page` object due to fixture scope.
+You can learn more about fixtures from the
+[pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html) doc page.
+
+To use these new fixtures, rewrite `tests/test_search.py` like this:
+
+```python
+def test_basic_duckduckgo_search(search_page, result_page):
+
+    # Given the DuckDuckGo home page is displayed
+    search_page.load()
+
+    # When the user searches for a phrase
+    search_page.search('panda')
+
+    # Then the search result query is the phrase
+    assert 'panda' == result_page.search_input_value()
+
+    # And the search result links pertain to the phrase
+    assert result_page.result_link_titles_contain_phrase('panda')
+
+    # And the search result title contains the phrase
+    assert 'panda' in result_page.title()
+```
+
+Notice a few things:
+
+* This test module no longer needs to import the page object classes from the `pages` module.
+* The `search_page` and `result_page` fixtures are declared as arguments for the test function.
+* The test function no longer explicitly constructs page objects.
+* The Playwright `page` fixture is no longer declared because it is no longer called directly by the test function.
+
+If you use page objects, then **all interactions should be performed using page objects**.
+It is not recommended to mix raw Playwright calls with page object calls.
+That becomes confusing, and it encourages poor practices like dirty hacks and copypasta.
+It also causes a test automation project to lose strength from a lack of conformity in design.
+
+Rerun the test one more time to make sure the fixtures work as expected.
+Congratulations!
+You have finished refactoring this test case using page objects.
