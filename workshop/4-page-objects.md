@@ -331,7 +331,21 @@ If we add more test functions in the future, that construction code will become 
 Page object fixtures will help our code stay concise.
 
 In pytest, shared fixtures belong in a module under the `tests` directory named `conftest.py`.
-Create `tests/conftest.py` and add the following code:
+Create a new file at `tests/conftest.py`.
+The new project directory layout should look like this:
+
+```
+tau-playwright-workshop
+├── pages
+│   ├── __init__.py
+│   ├── search.py
+│   └── result.py
+└── tests
+    ├── conftest.py
+    └── test_search.py
+```
+
+Then, add the following code to `tests/conftest.py`:
 
 ```python
 import pytest
@@ -339,11 +353,9 @@ import pytest
 from pages.result import DuckDuckGoResultPage
 from pages.search import DuckDuckGoSearchPage
 
-
 @pytest.fixture
 def result_page(page):
     return DuckDuckGoResultPage(page)
-
 
 @pytest.fixture
 def search_page(page):
