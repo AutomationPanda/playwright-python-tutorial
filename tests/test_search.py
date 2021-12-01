@@ -2,15 +2,17 @@
 These tests cover DuckDuckGo searches.
 """
 
+from pages.search import DuckDuckGoSearchPage
+
 
 def test_basic_duckduckgo_search(page):
+    search_page = DuckDuckGoSearchPage(page)
 
     # Given the DuckDuckGo home page is displayed
-    page.goto('https://www.duckduckgo.com')
+    search_page.load()
 
     # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
+    search_page.search('panda')
 
     # Then the search result query is the phrase
     assert 'panda' == page.input_value('#search_form_input')
