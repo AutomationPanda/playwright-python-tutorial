@@ -135,4 +135,80 @@ $ python3 -m pytest tests --video retain-on-failure
 
 ## Running tests in parallel
 
-TBD
+Even though Playwright is pretty fast (especially compared to Selenium WebDriver),
+running tests one at a time becomes very slow for large test suites.
+Individual tests can only be optimized so far.
+Running tests in parallel becomes a necessity.
+
+While Playwright does not provide parallel execution capabilities on its own,
+we can use the `pytest-xdist` plugin to run tests in parallel,
+and we can rely on Playwright browser contexts and pages to keep tests isolated.
+
+Install `pytest-xdist` via pip:
+
+```bash
+$ pip3 install pytest-xdist
+```
+
+Let's parameterize our test so that we have multiple test to run in parallel.
+Change the code in `tests/test_search.py` to match the following:
+
+```python
+import pytest
+
+ANIMALS = [
+    'panda',
+    'python',
+    'polar bear',
+    'parrot',
+    'porcupine',
+    'parakeet',
+    'pangolin',
+    'panther',
+    'platypus',
+    'peacock'
+]
+
+@pytest.mark.parametrize('phrase', ANIMALS)
+def test_basic_duckduckgo_search(search_page, result_page, phrase):
+
+    # Given the DuckDuckGo home page is displayed
+    search_page.load()
+
+    # When the user searches for a phrase
+    search_page.search(phrase)
+
+    # Then the search result query is the phrase
+    assert phrase == result_page.search_input_value()
+
+    # And the search result links pertain to the phrase
+    assert result_page.result_link_titles_contain_phrase(phrase)
+
+    # And the search result title contains the phrase
+    assert phrase in result_page.title()
+```
+
+The test is the same, but now it is parameterized to use ten different search phrases.
+
+Try running these new tests serially to see how long they take.
+Then, try running them in parallel using `pytest-xdist`'s `-n` option.
+The number you give with `-n` specifies the degree of concurrency.
+For example, you can run 2 tests in parallel like this:
+
+```bash
+$ python3 -m pytest tests -n 2
+```
+
+Typically, the optimal degree of concurrency is the number of processors or cores on your machine.
+Try running these tests in parallel at different degrees of concurrency (2, 3, 4, 5, higher?)
+to find the fastest completion time.
+
+(As a warning, DuckDuckGo may throttle your tests' requests if they happen too quickly.
+To work around this problem, try running with `--headed` or with `--slowmo 100`.)
+
+You can also test multiple browsers in parallel.
+For example, the following command will run the parameterized tests against all three Playwright browsers at 5x parallel:
+
+```bash
+$ python3 -m pytest tests -n 5 --browser chromium --browser firefox --browser webkit
+```
