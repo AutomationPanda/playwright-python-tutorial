@@ -61,10 +61,76 @@ $ python3 -m pytest tests --browser chromium --device "Pixel 5"
 Give it a try with `--headed --slowmo 1000` to see the drastically different screen sizes.
 
 
-
 ## Capturing screenshots and videos
 
-TBD
+While developing automated tests,
+we typically run them headed in slow motion so that we can see exactly what our test code does.
+However, when we run tests "for real" in a Continuous Integration system or on a regular schedule,
+we are not present in the moment of a failure to see exactly what went wrong.
+We rely on test reports, logs, and other artifacts to provide the information needed for root cause analysis.
+Since web UI tests are inherently visual,
+artifacts like screenshots and videos can be invaluable for determining failure reasons.
+A picture is truly worth a thousand words!
+
+You can capture screenshots at any time using the
+[screenshot](https://playwright.dev/python/docs/api/class-page#page-screenshot) method.
+However, the most valuable screenshots to capture are typically the ones that happen at the moment of failure.
+When a test fails, these happen at the end of the test.
+The `pytest-playwright` plugin provides a `--screenshot` option that will capture screenshots at the end of each test.
+By default, this option is set to `off`, but you can turn it `on` like this:
+
+```bash
+$ python3 -m pytest tests --screenshot on
+```
+
+This will capture a screenshot after every test.
+Give it a try!
+Playwright will save screenshots as PNG files under a directory named `test-results`.
+You can change the output directory using the `--output` option.
+
+The screenshot should look like this:
+
+![Test screenshot](images/test-screenshot.png)
+
+Try capturing screenshots with different browsers and devices.
+(Please note that Playwright will delete all old results in the output folder before each run.)
+
+Even though individual screenshot files may be small,
+screenshots can add up over time to become a very large data storage burden.
+Imagine a large test suite running thousands of tests daily.
+Saving a screenshot for every test becomes impractical.
+Instead of using `on` to save a screenshot for every test,
+use `only-on-failure` to save a screenshot for every *failing* test only:
+
+```bash
+$ python3 -m pytest tests --screenshot only-on-failure
+```
+
+If you run this command, then you should not get a screenshot for the `test_basic_duckduckgo_search`
+because it should pass.
+
+What could be better than automatic screenshots for tests?
+How about *videos*!
+If a picture is worth a thousand words, then a video recording must be worth a million.
+Yet again, the `pytest-playwright` plugin makes automation easy by providing an option named `--video`.
+By default, this option is set to `off`,
+but we can set it to `on` to save a video recording for every test,
+or we can set it to `retain-on-failure` to save video recordings only for failed tests.
+
+Give video recording a try with this command:
+
+```bash
+$ python3 -m pytest tests --video on
+```
+
+Playwright saves videos as [WebM](https://en.wikipedia.org/wiki/WebM) files in the output directory.
+
+Just like with screenshots, saving videos for every test becomes imprudent over time.
+It is recommended to use the `retain-on-failure` option:
+
+```bash
+$ python3 -m pytest tests --video retain-on-failure
+```
 
 
 ## Running tests in parallel
