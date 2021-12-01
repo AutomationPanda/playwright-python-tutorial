@@ -1,12 +1,20 @@
 # tau-playwright-workshop
 
-This repository contains the example code for the Playwright workshop
+This repository contains the instructions and example code for the Playwright workshop
 for [TAU: The Homecoming](https://applitools.com/tau-homecoming/)
 on December 1, 2021.
 The workshop will be done in [Python](python.org).
 
-The `workshop` folder contains full instructions for the workshop.
-That way, you can still code along to learn Playwright even if you miss the main event!
+
+## Instructions
+
+Please try to attend the workshop *live* on the day of the event.
+However, if you cannot make it, never fear!
+**You can still take the workshop as a self-guided tutorial.**
+Start by reading this README.
+Then, follow the guides in the `workshop` folder.
+Each part of the workshop has a `workshop` guide with full instructions.
+Feel free to open issues against this repository if you have any trouble completing the workshop independently.
 
 
 ## Abstract
@@ -41,7 +49,7 @@ If you are using a different shell or a Windows command line, some commands may 
 
 ## Agenda
 
-This workshop has five main parts:
+This workshop has five main parts, each with three sections:
 
 1. Getting started
    1. What is Playwright?
@@ -67,7 +75,7 @@ This workshop has five main parts:
 
 ## Example code branches
 
-Each part has a corresponding branch in this repository containing the part's example code and `workshop` instructions.
+Each workshop part has a corresponding branch in this repository containing the part's example code and `workshop` instructions.
 The branches allow you to check your progress at any point during the workshop.
 The branch names are:
 
