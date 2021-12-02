@@ -1,3 +1,5 @@
+![Workshop card](workshop/images/workshop-card.png)
+
 # tau-playwright-workshop
 
 This repository contains the instructions and example code for the Playwright workshop
