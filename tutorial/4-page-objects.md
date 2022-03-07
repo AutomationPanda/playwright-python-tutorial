@@ -29,7 +29,7 @@ Create a new directory named `pages`, and inside it, create blank files with the
 Your project's directory layout should look like this:
 
 ```
-tau-playwright-workshop
+playwright-python-tutorial
 ├── pages
 │   ├── __init__.py
 │   ├── search.py
@@ -77,7 +77,7 @@ Let's also add the DuckDuckGo URL:
 
 *(Warning:
 Base URLs should typically be passed into automation code as an input, not hard-coded in a page object.
-We are doing this here as a matter of simplicity for this workshop.)*
+We are doing this here as a matter of simplicity for this tutorial.)*
 
 Next, let's handle dependency injection for the browser automator.
 Since each test will have its own Playwright page, we should inject that page.
@@ -90,7 +90,7 @@ Add the following initializer method to the class:
 ```
 
 The `__init__` method is essentially a constructor for Python classes
-(but with a bit of nuance that doesn't matter for this workshop).
+(but with a bit of nuance that doesn't matter for this tutorial).
 It has one argument named `page` for the Playwright page,
 which it stores as an instance variable (via `self`).
 
@@ -335,7 +335,7 @@ Create a new file at `tests/conftest.py`.
 The new project directory layout should look like this:
 
 ```
-tau-playwright-workshop
+playwright-python-tutorial
 ├── pages
 │   ├── __init__.py
 │   ├── search.py
