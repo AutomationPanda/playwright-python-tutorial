@@ -1,6 +1,6 @@
 # Part 3: Writing assertions
 
-Part 3 of the workshop focuses on making assertions about the result page after performing a search.
+Part 3 of the tutorial focuses on making assertions about the result page after performing a search.
 Waiting becomes a much bigger concern for these steps, but Playwright makes it easy.
 
 
@@ -245,8 +245,13 @@ Rerun the test again to make sure it works.
 If it does, congrats!
 You have just completed a full test case in Python using Playwright with pytest.
 
+Playwright's [`Page`](https://playwright.dev/python/docs/api/class-page) class
+provides several methods for interacting with pages and getting state from them.
+Read the docs to familiarize yourself with them.
+`Page` provides methods to interact with *every* type of web element.
+
 Notice how concise this code is.
 Unfortunately, it's not very reusable.
 If other tests needed to perform DuckDuckGo searches,
 they would duplicate similar calls.
-In the next workshop part, we will refactor this test using page objects to make the code more reusable and extendable.
+In the next tutorial part, we will refactor this test using page objects to make the code more reusable and extendable.
