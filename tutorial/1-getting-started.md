@@ -98,7 +98,7 @@ $ pip3 install pytest-playwright
 ```
 
 > If you want to run the tests from this repository instead of creating a fresh project,
-> install the dependencies from the `requirements.txt` file using this command:
+> install the dependencies using this command:
 >  
 > `$ pip3 install -r requirements.txt`
 
