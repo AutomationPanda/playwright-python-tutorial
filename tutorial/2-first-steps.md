@@ -1,6 +1,6 @@
 # Part 2: First steps with Playwright
 
-Part 2 of the workshop shows how to take your first steps with Playwright calls.
+Part 2 of the tutorial shows how to take your first steps with Playwright calls.
 It will explain browsers, contexts, and pages.
 It will also cover basic Playwright API calls.
 
@@ -136,6 +136,7 @@ Out of the box, Playwright supports the following types of selectors:
 * N-th element
 * React
 * Vue
+* ID attributes
 
 Text and CSS selectors also pierce the Shadow DOM by default!
 
@@ -143,7 +144,7 @@ In general, you should keep selectors as simple as possible.
 Try to stick to text, IDs, or CSS selectors.
 Use more complicated selectors only as necessary.
 
-This workshop will not cover recommended practices for element selectors deeply.
+This tutorial will not cover recommended practices for element selectors deeply.
 If you want to learn more about selectors,
 read the [Element selectors](https://playwright.dev/python/docs/selectors) page in the Playwright docs,
 or take the [Web Element Locator Strategies](https://testautomationu.applitools.com/web-element-locator-strategies/) course
@@ -174,6 +175,11 @@ Append the following line to the test case:
 ```python
     page.fill('#search_form_input_homepage', 'panda')
 ```
+
+> Since `search_form_input_homepage` is an ID, we could also use Playwright's
+> [ID attribute selector](https://playwright.dev/python/docs/selectors#id-data-testid-data-test-id-data-test-selectors):
+>  
+> `page.fill('id=search_form_input_homepage', 'panda')`
 
 Using Selenium WebDriver, we would need to locate the element and then send the interaction to it.
 However, in Playwright, these two parts are combined into a single call.
@@ -222,4 +228,4 @@ Now, you should see the test actually perform the search!
 Navigation, input filling, and clicking are only three of many page interactions you can do with Playwright.
 Anything a user can do on a web page, Playwright can do as well.
 Check out the Playwright [Page](https://playwright.dev/python/docs/api/class-page) API to see *all* methods and attributes.
-We will use more of these calls in the next workshop parts.
+We will use more of these calls in the next tutorial parts.
