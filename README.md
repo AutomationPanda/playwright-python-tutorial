@@ -1,4 +1,4 @@
-![Playwright banner](workshop/images/playwright-banner.jpeg)
+![Playwright banner](tutorial/images/playwright-banner.jpeg)
 
 
 # Tutorial: Web Testing with Playwright in Python
@@ -47,8 +47,8 @@ so new features are coming all the time!
 ## Tutorial Instructions
 
 You can take this tutorial independently by following the instructions
-in this `README` and in the [`workshop`](workshop) folder.
-Feel free to open issues against this repository if you have any trouble completing the workshop independently.
+in this `README` and in the [`tutorial`](tutorial) folder.
+Feel free to open issues against this repository if you have any trouble completing the tutorial independently.
 
 I also have given (or will be giving) this tutorial as a live workshop at the following events:
 
@@ -101,7 +101,7 @@ or [PyCharm](https://www.jetbrains.com/pycharm/).
 
 ## Example code branches
 
-Each tutorial part has a corresponding branch in this repository containing the part's example code and `workshop` instructions.
+Each tutorial part has a corresponding branch in this repository containing the part's example code and `tutorial` instructions.
 The branches allow you to check your progress at any point during the tutorial.
 The branch names are:
 
