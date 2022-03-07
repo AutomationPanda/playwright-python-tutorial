@@ -1,9 +1,9 @@
 # Nifty Playwright tricks
 
 Now that we have a complete test case, we can use it to explore some of Playwright's nifty features.
-Part 5 of this workshop will explore various things like testing different browsers, capturing images, and running tests in parallel.
+Part 5 of this tutorial will explore various things like testing different browsers, capturing images, and running tests in parallel.
 Check the [Pytest plugin](https://playwright.dev/python/docs/test-runners) page
-in the Playwright docs to learn even more advanced tricks after this workshop.
+in the Playwright docs to learn even more advanced tricks after this tutorial.
 
 
 ## Testing different browsers
@@ -43,7 +43,7 @@ $ python3 -m pytest tests --browser-channel chrome
 $ python3 -m pytest tests --browser-channel msedge
 ```
 
-Unfortunately, at the time of this workshop (December 2021),
+Unfortunately, at the time of developing this tutorial (March 2022),
 Playright does not support channels for browsers other than Chrome and Edge.
 
 Playwright also allows you to emulate mobile devices to test responsive layouts.
@@ -203,8 +203,8 @@ Typically, the optimal degree of concurrency is the number of processors or core
 Try running these tests in parallel at different degrees of concurrency (2, 3, 4, 5, higher?)
 to find the fastest completion time.
 
-(As a warning, DuckDuckGo may throttle your tests' requests if they happen too quickly.
-To work around this problem, try running with `--headed` or with `--slowmo 100`.)
+> *Warning:* DuckDuckGo may throttle your tests' requests if they happen too quickly.
+> To work around this problem, try running with `--headed` or with `--slowmo 100`.)
 
 You can also test multiple browsers in parallel.
 For example, the following command will run the parameterized tests against all three Playwright browsers at 5x parallel:
