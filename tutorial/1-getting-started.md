@@ -1,6 +1,6 @@
 # Part 1: Getting started
 
-Part 1 of the workshop explains how to set up a Python test automation project with pytest and Playwright.
+Part 1 of the tutorial explains how to set up a Python test automation project with pytest and Playwright.
 
 
 ## What is Playwright?
@@ -24,7 +24,7 @@ from the docs.
 
 ## Our web search test
 
-For this workshop, we will walk through one test scenario for DuckDuckGo searching.
+For this tutorial, we will walk through one test scenario for DuckDuckGo searching.
 [DuckDuckGo](https://duckduckgo.com/) is a search engine like Google or Yahoo.
 
 The steps for a basic DuckDuckGo search are:
@@ -46,14 +46,14 @@ It is also important to try a test manually before attempting to automate it.
 ## Test project setup
 
 Let's set up the test project!
-For this workshop, we will build a new project from the ground up.
+For this tutorial, we will build a new project from the ground up.
 The GitHub repository should be used exclusively as a reference for example code.
 
-Create a directory named `tau-playwright-workshop` for the project:
+Create a directory named `playwright-python-tutorial` for the project:
 
 ```bash
-$ mkdir tau-playwright-workshop
-$ cd tau-playwright-workshop
+$ mkdir playwright-python-tutorial
+$ cd playwright-python-tutorial
 ```
 
 Inside this project, create a [Python virtual environment](https://docs.python.org/3/tutorial/venv.html)
@@ -72,7 +72,7 @@ Python has two incompatible major versions: 2 and 3.
 Although Python 2 end-of-life was January 1, 2020, many machines still run it.
 For example, macOS comes bundled with Python 2.7.18.
 Sometimes, the `python` executable may point to Python 2 instead of 3.
-To be precise about versions and executables, we will use the `python3` and `pip3` commands explicitly in this workshop.
+To be precise about versions and executables, we will use the `python3` and `pip3` commands explicitly in this tutorial.
 
 After creating a virtual environment, you must "activate" it.
 On macOS or Linux, use the following command:
@@ -97,6 +97,11 @@ $ pip3 install pytest
 $ pip3 install pytest-playwright
 ```
 
+> If you want to run the tests from this repository instead of creating a fresh project,
+> install the dependencies using this command:
+>  
+> `$ pip3 install -r requirements.txt`
+
 By itself, Playwright is simply a library for browser automation.
 We need a test framework like pytest if we want to automate tests.
 The [`pytest-playwright`](https://playwright.dev/python/docs/test-runners)
@@ -114,18 +119,19 @@ greenlet==1.1.2
 idna==3.3
 iniconfig==1.1.1
 packaging==21.3
-playwright==1.17.0
+playwright==1.19.1
 pluggy==1.0.0
 py==1.11.0
-pyee==8.2.2
+pyee==8.1.0
 pyparsing==3.0.6
-pytest==6.2.5
+pytest==7.0.1
 pytest-base-url==1.4.2
-pytest-playwright==0.2.2
+pytest-playwright==0.2.3
 python-slugify==5.0.2
 requests==2.26.0
 text-unidecode==1.3
 toml==0.10.2
+tomli==2.0.1
 urllib3==1.26.7
 websockets==10.1
 ```

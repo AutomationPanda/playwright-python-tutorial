@@ -1,57 +1,66 @@
-![Workshop card](workshop/images/workshop-card.png)
-
-# tau-playwright-workshop
-
-This repository contains the instructions and example code for the Playwright workshop
-for [TAU: The Homecoming](https://applitools.com/tau-homecoming/)
-on December 1, 2021.
-The workshop will be done in [Python](https://www.python.org/).
+![Playwright banner](tutorial/images/playwright-banner.jpeg)
 
 
-## Instructions
-
-Please try to attend the workshop *live* on the day of the event.
-However, if you cannot make it, never fear!
-**You can still take the workshop as a self-guided tutorial.**
-Start by reading this README.
-Then, follow the guides in the `workshop` folder.
-Each part of the workshop has a `workshop` guide with full instructions.
-Feel free to open issues against this repository if you have any trouble completing the workshop independently.
+# Tutorial: Web Testing with Playwright in Python
 
 
 ## Abstract
 
-[Playwright](https://playwright.dev/python/)
-is a hot new browser automation tool from Microsoft.
-With bindings for .NET, Java, JavaScript, and Python, it’s a strong alternative to Selenium WebDriver for end-to-end web app testing.
+Everybody gets frustrated when web apps are broken,
+but testing them thoroughly doesn't need to be a chore.
+[Playwright](https://playwright.dev/python/),
+a new open-source browser automation tool from Microsoft,
+makes testing web apps fun!
+Playwright outperforms other browser automation with a slew of nifty features
+like automatic waiting, mobile emulation, and network interception.
+Plus, with isolated browser contexts,
+Playwright tests can set up *much* faster than traditional Web UI tests.
 
-This workshop will be an introduction to Playwright using [Python](https://www.python.org/).
-We will automate a test scenario together that performs a [DuckDuckGo](https://duckduckgo.com/) search.
-As we code along the test together, we will learn:
-
-* How to install and configure Playwright
-* How to integrate Playwright with [pytest](https://docs.pytest.org/), Python’s leading test framework
-* How to perform interactions through page objects
-* How to conveniently run different browsers, capture videos, and run tests in parallel
-
-Come prepared with Python 3.7 or higher installed on your machine.
-By the end of the workshop, you will have a solid foundation in Playwright as well as a Python project you can extend with new tests!
-
-
-## Prerequisites
-
-To code along with this workshop, your machine must have Python 3.7 or higher.
-You should also have a decent Python editor like
-[Visual Studio Code](https://code.visualstudio.com/docs/languages/python)
-or [PyCharm](https://www.jetbrains.com/pycharm/).
-
-The command line shown in examples below is [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell)).
-If you are using a different shell or a Windows command line, some commands may need to be different.
+In this tutorial, we will build a [Python](https://www.python.org/)
+test automation project from the ground up using Playwright.
+We will automate web search engine tests together step-by-step
+using Playwright for interactions and pytest for execution.
+We'll also explore Playwright tricks
+like cross-browser testing, capturing videos, and even running tests in parallel!
+By the end of this tutorial, you'll be empowered to test modern web apps with modern web test tools.
+You'll also have an example project to be the foundation for your future tests.
 
 
-## Agenda
+## What is Playwright?
 
-This workshop has five main parts, each with three sections:
+Playwright is a fairly new test automation framework from Microsoft.
+It is open source, and it has bindings in TypeScript/JavaScript, Python, .NET, and Java.
+Some of the nice features Playwright offers include:
+
+* concise, readable calls
+* easy out-of-the-box setup
+* very fast execution times (compared to other browser automation tools)
+* cross-browser and mobile emulation support
+* automatic waiting
+* built-in API calls
+* screenshots and video capture
+
+Microsoft is actively developing Playwright,
+so new features are coming all the time!
+
+
+## Tutorial Instructions
+
+You can take this tutorial independently by following the instructions
+in this `README` and in the [`tutorial`](tutorial) folder.
+Feel free to open issues against this repository if you have any trouble completing the tutorial independently.
+
+I also have given (or will be giving) this tutorial as a live workshop at the following events:
+
+* [TAU: The Homecoming](https://applitools.com/on-demand-videos/tau-the-homecoming-2021/) (December 1, 2021)
+* [Python Web Conference 2022](https://2022.pythonwebconf.com/tutorials/end-to-end-testing-with-playwright) (March 22, 2021)
+* [STAREast 2022](https://stareast.techwell.com/program/tutorials/web-ui-testing-playwright-python-stareast-2022) (April 26, 2022)
+* [PyCon US 2022](https://us.pycon.org/2022/schedule/presentation/35/) (April 28, 2022)
+
+
+## Outline
+
+This tutorial has five main parts, each with three sections:
 
 1. Getting started
    1. What is Playwright?
@@ -75,10 +84,25 @@ This workshop has five main parts, each with three sections:
    3. Running tests in parallel
 
 
+## Prerequisites
+
+You must have basic Python programming skills to complete this tutorial.
+If you are new to Python, check out the free
+[Python Programming](https://testautomationu.applitools.com/python-tutorial/) course
+on Test Automation University.
+
+Your machine must also have Python 3.7 or higher installed.
+You can download the latest version of Python from [Python.org](https://www.python.org/).
+
+You should also have a decent Python editor like
+[Visual Studio Code](https://code.visualstudio.com/docs/languages/python)
+or [PyCharm](https://www.jetbrains.com/pycharm/).
+
+
 ## Example code branches
 
-Each workshop part has a corresponding branch in this repository containing the part's example code and `workshop` instructions.
-The branches allow you to check your progress at any point during the workshop.
+Each tutorial part has a corresponding branch in this repository containing the part's example code and `tutorial` instructions.
+The branches allow you to check your progress at any point during the tutorial.
 The branch names are:
 
 | Part     | Branch              |
