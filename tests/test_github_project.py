@@ -35,13 +35,8 @@ def github_project_name():
     return _get_env_var('GITHUB_PROJECT_NAME')
 
 
-@pytest.fixture(scope='session')
-def github_project_number():
-    return _get_env_var('GITHUB_PROJECT_NUMBER')
-
-
 @pytest.fixture(scope="session")
-def github_request_context(playwright, github_username, github_access_token):
+def github_request_context(playwright, github_access_token):
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "Authorization": f"token {github_access_token}"}
@@ -98,7 +93,7 @@ def test_create_project_card(github_request_context, project_column_ids):
     assert r_response.json()['note'] == note
 
 
-def test_move_project_card(github_request_context, project_column_ids, page, github_username, github_password, github_project_number):
+def test_move_project_card(github_request_context, github_project, project_column_ids, page, github_username, github_password):
     # Prep a card via API
     now = time.time()
     note = f'Move this card at {now}'
@@ -114,7 +109,8 @@ def test_move_project_card(github_request_context, project_column_ids, page, git
     page.click('input[name="commit"]')
 
     # Load the project page
-    page.goto(f'https://github.com/users/{github_username}/projects/{github_project_number}')
+    number = github_project['number']
+    page.goto(f'https://github.com/users/{github_username}/projects/{number}')
 
     # Move a card via web UI
     page.drag_and_drop(f'text="{note}"', f'id=column-cards-{project_column_ids[1]}')
