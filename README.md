@@ -18,7 +18,7 @@ Playwright tests can set up *much* faster than traditional Web UI tests.
 
 In this tutorial, we will build a [Python](https://www.python.org/)
 test automation project from the ground up using Playwright.
-We will automate web search engine tests together step-by-step
+We will automate web tests together step-by-step
 using Playwright for interactions and pytest for execution.
 We'll also explore Playwright tricks
 like cross-browser testing, capturing videos, and even running tests in parallel!
@@ -37,8 +37,8 @@ Some of the nice features Playwright offers include:
 * very fast execution times (compared to other browser automation tools)
 * cross-browser and mobile emulation support
 * automatic waiting
-* built-in API calls
 * screenshots and video capture
+* built-in API calls
 
 Microsoft is actively developing Playwright,
 so new features are coming all the time!
@@ -60,7 +60,7 @@ I also have given (or will be giving) this tutorial as a live workshop at the fo
 
 ## Outline
 
-This tutorial has five main parts, each with three sections:
+This tutorial has six main parts, each with three sections:
 
 1. Getting started
    1. What is Playwright?
@@ -82,6 +82,10 @@ This tutorial has five main parts, each with three sections:
    1. Testing different browsers
    2. Capturing screenshots and videos
    3. Running tests in parallel
+6. Testing with APIs
+   1. API setup
+   2. Writing a pure API test
+   3. Writing a hybrid UI/API test
 
 
 ## Prerequisites
@@ -98,6 +102,9 @@ You should also have a decent Python editor like
 [Visual Studio Code](https://code.visualstudio.com/docs/languages/python)
 or [PyCharm](https://www.jetbrains.com/pycharm/).
 
+If you wish to complete Part 6 ("Testing with APIs"),
+then you will need a [GitHub](https://github.com/) account.
+
 
 ## Example code branches
 
@@ -113,4 +120,5 @@ The branch names are:
 | Part 3   | 3-assertions        |
 | Part 4   | 4-page-objects      |
 | Part 5   | 5-playwright-tricks |
+| Part 6   | 6-api-testing       |
 | Complete | main                |
