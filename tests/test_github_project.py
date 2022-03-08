@@ -19,7 +19,7 @@ def test_create_project_card(gh_context, project_column_ids):
 
     # Prep test data
     now = time.time()
-    note = f'A new task at {now}!'
+    note = f'A new task at {now}'
 
     # Create a new card
     c_response = gh_context.post(
