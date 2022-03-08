@@ -53,6 +53,10 @@ Typically, a test will only need to call the `page` fixture directly.
 These fixtures will also automatically clean up everything after testing is complete.
 You do not need to explicitly close the browser.
 
+> Playwright supports both synchronous and asynchronous calls for Python.
+> Synchronous calls are sufficient for almost all test automation needs.
+> Asynchronous calls could be useful for other types of automation, such as web scraping.
+
 Let's update our test stub to call the `page` fixture.
 In `tests/test_search.py`, change the test function signature from this:
 
