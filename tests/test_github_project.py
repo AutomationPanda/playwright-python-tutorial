@@ -26,12 +26,13 @@ def test_create_project_card(gh_context, project_column_ids):
         f'/projects/columns/{project_column_ids[0]}/cards',
         data={'note': note})
     assert c_response.ok
+    assert c_response.json()['note'] == note
 
     # Retrieve the newly created card
     card_id = c_response.json()['id']
     r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
     assert r_response.ok
-    assert r_response.json()['note'] == note
+    assert r_response.json() == c_response.json()
 
 
 # ------------------------------------------------------------
@@ -59,13 +60,16 @@ def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_
     page.click('input[name="commit"]')
 
     # Load the project page
-    number = gh_project['number']
-    page.goto(f'https://github.com/users/{gh_username}/projects/{number}')
+    page.goto(f'https://github.com/users/{gh_username}/projects/{gh_project["number"]}')
 
-    # Move a card via web UI
+    # Verify the card appears in the first column
+    card_xpath = f'//div[@id="column-cards-{col0}"]//p[contains(text(), "{note}")]'
+    expect(page.locator(card_xpath)).to_be_visible()
+
+    # Move a card to the second column via web UI
     page.drag_and_drop(f'text="{note}"', f'id=column-cards-{col1}')
 
-    # Verify the card is in the new column via UI
+    # Verify the card is in the second column via UI
     card_xpath = f'//div[@id="column-cards-{col1}"]//p[contains(text(), "{note}")]'
     expect(page.locator(card_xpath)).to_be_visible()
 
