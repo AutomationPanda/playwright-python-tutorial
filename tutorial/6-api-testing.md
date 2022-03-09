@@ -12,6 +12,8 @@ They will make multiple calls to the [GitHub API](https://docs.github.com/en/res
 The first test will *create* a new project card purely from the GitHub API,
 and the second test will *move* a project card from one column to another.
 
+![GitHub Project Cards](images/github-project-cards.png)
+
 
 ## API setup
 
@@ -442,7 +444,7 @@ For safety and sanity, we should check that the first project column has the car
     expect(page.locator(card_xpath)).to_be_visible()
 ```
 
-The card XPath is complicated.
+The card XPath is complex.
 Let's break it down:
 
 1. `//div[@id="column-cards-{source_col}"]` locates the source column `div` using its ID
