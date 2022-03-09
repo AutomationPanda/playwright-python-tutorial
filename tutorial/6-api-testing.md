@@ -356,4 +356,199 @@ The test should pass very quickly.
 
 ## Writing a hybrid UI/API test
 
-?
+Our second test will move a card from one project column to another.
+In this test, we will use complementary API and UI interactions to cover this behavior.
+Here are our steps:
+
+1. Prep the test data
+2. Create a new card (API)
+3. Log into the GitHub website (UI)
+4. Load the project page (UI)
+5. Move the card from one column to another (UI)
+6. Verify the card is in the second column (UI)
+7. Verify the card change persisted to the backend (API)
+
+Thankfully we can reuse many of the fixtures we created for the previous test.
+Even though the previous test created a card, we must create a new card for this test.
+Tests can run individually or out of order.
+We should not create any interdependencies between individual test cases.
+
+Let's dive directly into the test case.
+
+We'll need to use Playwright's `expect` function for some of our new assertions.
+Add this import statement to `tests/test_github_project.py`:
+
+```python
+from playwright.sync_api import expect
+```
+
+Add a new test function with all these fixtures:
+
+```python
+def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_username, gh_password):
+```
+
+Moving a card requires two columns: the source column and the destination column.
+For simplicity, let's use the first two columns,
+and let's create convenient variables for their IDs:
+
+```python
+    source_col = project_column_ids[0]
+    dest_col = project_column_ids[1]
+```
+
+Just like in the previous test, we should write a unique note for the card to create:
+
+```python
+    now = time.time()
+    note = f'Move this card at {now}'
+```
+
+The code to create a card via the GitHub API is pretty much the same as before, too:
+
+```python
+    c_response = gh_context.post(
+        f'/projects/columns/{source_col}/cards',
+        data={'note': note})
+    assert c_response.ok
+```
+
+Now, it's time to switch from API to UI.
+We need to log into the GitHub website to interact with this new card.
+Log into GitHub like this, using fixtures for username and password:
+
+```python
+    page.goto(f'https://github.com/login')
+    page.fill('id=login_field', gh_username)
+    page.fill('id=password', gh_password)
+    page.click('input[name="commit"]')
+```
+
+These interactions use `Page` methods we saw before in our DuckDuckGo search test.
+Then, once logged in, navigate directly to the project page:
+
+```python
+    page.goto(f'https://github.com/users/{gh_username}/projects/{gh_project["number"]}')
+```
+
+Direct URL navigation is faster and simpler than clicking through elements on pages.
+We can retrieve the GitHub project number from the project's data.
+(*Warning:* the project number for the URL is different from the project's ID number.)
+
+For safety and sanity, we should check that the first project column has the card we created via API:
+
+```python
+    card_xpath = f'//div[@id="column-cards-{source_col}"]//p[contains(text(), "{note}")]'
+    expect(page.locator(card_xpath)).to_be_visible()
+```
+
+The card XPath is complicated.
+Let's break it down:
+
+1. `//div[@id="column-cards-{source_col}"]` locates the source column `div` using its ID
+2. `//p[contains(text(), "{note}")]` locates a child `p` that contains the text of the target card's note
+
+The assertion is also a bit complex.
+Let's break it down, too:
+
+1. `expect(...)` is a special Playwright function for assertions on page locators.
+2. `page.locator(card_xpath)` is a web element locator for the target card.
+3. `to_be_visible()` is a condition method for the `expect` assertion.
+   It verifies that the "expected" locator's element is visible on the page.
+
+Since the locator includes the source column as the parent for the card's paragraph,
+asserting its visibility on the page is sufficient for verifying correctness.
+If we only checked for the paragraph element without the parent column,
+then the test would not detect if the card appeared in the wrong column.
+Furthermore, Playwright assertions will automatically wait up to a timeout for conditions to become true.
+
+Now, we can perform the main interaction:
+moving the card from one column to another.
+Playwright provides a nifty
+[`drag_and_drop`](https://playwright.dev/python/docs/api/class-page#page-drag-and-drop) method:
+
+```python
+    page.drag_and_drop(f'text="{note}"', f'id=column-cards-{dest_col}')
+```
+
+This call will drag the card to the destination column.
+Here, we can use a simpler locator for the card because we previously verified its correct placement.
+
+After moving the card, we should verify that it indeed appears in the destination column:
+
+```python
+    card_xpath = f'//div[@id="column-cards-{dest_col}"]//p[contains(text(), "{note}")]'
+    expect(page.locator(card_xpath)).to_be_visible()
+```
+
+Finally, we should also check that the card's changes persisted to the backend.
+Let's `GET` that card's most recent data via the API:
+
+```python
+    card_id = c_response.json()['id']
+    r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
+    assert r_response.ok
+    assert r_response.json()['column_url'].endswith(str(dest_col))
+```
+
+The way to verify the column update is to check the new ID in the `column_url` value.
+
+Here's the completed test code for `test_move_project_card`:
+
+```python
+import time
+from playwright.sync_api import expect
+
+def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_username, gh_password):
+
+    # Prep test data
+    source_col = project_column_ids[0]
+    dest_col = project_column_ids[1]
+    now = time.time()
+    note = f'Move this card at {now}'
+
+    # Create a new card via API
+    c_response = gh_context.post(
+        f'/projects/columns/{source_col}/cards',
+        data={'note': note})
+    assert c_response.ok
+
+    # Log in via UI
+    page.goto(f'https://github.com/login')
+    page.fill('id=login_field', gh_username)
+    page.fill('id=password', gh_password)
+    page.click('input[name="commit"]')
+
+    # Load the project page
+    page.goto(f'https://github.com/users/{gh_username}/projects/{gh_project["number"]}')
+
+    # Verify the card appears in the first column
+    card_xpath = f'//div[@id="column-cards-{source_col}"]//p[contains(text(), "{note}")]'
+    expect(page.locator(card_xpath)).to_be_visible()
+
+    # Move a card to the second column via web UI
+    page.drag_and_drop(f'text="{note}"', f'id=column-cards-{dest_col}')
+
+    # Verify the card is in the second column via UI
+    card_xpath = f'//div[@id="column-cards-{dest_col}"]//p[contains(text(), "{note}")]'
+    expect(page.locator(card_xpath)).to_be_visible()
+
+    # Verify the backend is updated via API
+    card_id = c_response.json()['id']
+    r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
+    assert r_response.ok
+    assert r_response.json()['column_url'].endswith(str(dest_col))
+```
+
+Run this new test.
+If you want to see the browser in action, included the `--headed` option.
+The test will take a few seconds longer than the pure API test,
+but both should pass!
+
+> *Warning:*
+> You might want to periodically archive cards in your GitHub project
+> that are created by these tests.
+
+Complementing UI interactions with API calls is a great way to optimize test execution.
+Instead of doing all test steps through the UI, which is slower and more prone to race conditions,
+certain actions like pre-loading data or verifying persistent changes can be handled with API calls.
