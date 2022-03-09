@@ -111,10 +111,247 @@ def gh_project_name():
 Now, our tests can safely and easily fetch these variables.
 These fixtures have *session* scope so that pytest will read them only one time during the entire testing session.
 
+The last thing we need is a Playwright request context object tailored to GitHub API requests.
+We could build individual requests for each endpoint call,
+but then we would need to explicitly set things like the base URL and the authentication token on each request.
+Instead, with Playwright, we can build an
+[`APIRequestContext`](https://playwright.dev/python/docs/api/class-apirequestcontext)
+tailored to GitHub API requests.
+Add the following fixture to `tests/conftest.py` to build a request context object for the GitHub API:
+
+```python
+@pytest.fixture(scope='session')
+def gh_context(playwright, gh_access_token):
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": f"token {gh_access_token}"}
+
+    request_context = playwright.request.new_context(
+        base_url="https://api.github.com",
+        extra_http_headers=headers)
+
+    yield request_context
+    request_context.dispose()
+```
+
+Let's break down the code:
+
+1. The `gh_context` fixture has *session* scope because the context object can be shared by all tests.
+2. It requires the `playwright` fixture for creating a new context object,
+   and it requires the `gh_access_token` fixture we just wrote for getting your personal access token.
+3. GitHub API requests require two headers:
+   1. An `Accept` header for proper JSON formatting
+   2. An `Authorization` header that uses the access token
+4. `playwright.request.new_context(...)` creates a new `APIRequestContext` object
+   with the base URL for the GitHub API and the headers.
+5. The fixture yields the new context object and disposes of it after testing is complete.
+
+Now, any test or other fixture can call `gh_context` for building GitHub API requests!
+All requests created using `gh_context` will contain this base URL and these headers by default.
+
+
 
 ## Writing a pure API test
 
-?
+Our first test will create a new project card exclusively using the [GitHub API](https://docs.github.com/en/rest).
+The main part of the test has only two steps:
+
+1. Create a new card on the project board.
+2. Retrieve the newly created card to verify that it was created successfully.
+
+However, this test will need more than just two API calls.
+Here is the endpoint for creating a new project card:
+
+```
+POST /projects/columns/{column_id}/cards
+```
+
+Notice that to create a new card with this endpoint,
+we need the ID of the target column in the desired project.
+The column IDs come from the project data.
+Thus, we need to make the following chain of calls:
+
+1. [Retrieve a list of user projects](https://docs.github.com/en/rest/reference/projects#list-user-projects)
+   to find the target project by name.
+2. [Retrieve a list of project columns](https://docs.github.com/en/rest/reference/projects#list-project-columns)
+   for the target project to find column IDs.
+3. [Create a project card](https://docs.github.com/en/rest/reference/projects#create-a-project-card)
+   in one of the columns using its IDs.
+4. [Retrieve the project card](https://docs.github.com/en/rest/reference/projects#get-a-project-card)
+   using the card's ID.
+
+> The links provided above for each request document how to make each call.
+> They also include example requests and responses.
+
+The first two requests should be handled by fixtures
+because they could (and, for our case, *will*) be used for multiple tests.
+Furthermore, all of these requests require
+[authentication](https://docs.github.com/en/rest/overview/other-authentication-methods)
+using your personal access token.
+
+Let's write a fixture for the first request to find the target project.
+Add this code to `conftest.py`:
+
+```python
+@pytest.fixture(scope='session')
+def gh_project(gh_context, gh_username, gh_project_name):
+    resource = f'/users/{gh_username}/projects'
+    response = gh_context.get(resource)
+    assert response.ok
+    
+    name_match = lambda x: x['name'] == gh_project_name
+    filtered = filter(name_match, response.json())
+    project = list(filtered)[0]
+    assert project
+
+    return project
+```
+
+The `gh_project` fixture has *session* scope
+because we will treat the project's existence and name as immutable during test execution.
+It uses the `gh_context` fixture to build requests with authentication,
+and it uses the `gh_username` and `gh_project_name` fixtures for finding the target project.
+To get a list of all your projects,
+it makes a `GET` request to `/users/{gh_username}/projects` using `gh_context`,
+which automatically includes the base URL, headers, and authentication.
+The subsequent `assert response.ok` command makes sure the request was successful.
+If anything went wrong, tests would abort immediately.
+
+The resulting response will contain a list of *all* user projects.
+This fixture then filters the list to find the project with the target project name.
+Once found, it asserts that the project object exists and then returns it.
+
+Let's write a fixture for the next request in the call chain to get the list of columns for our project.
+Add the following code to `conftest.py`:
+
+```python
+@pytest.fixture()
+def project_columns(gh_context, gh_project):
+    response = gh_context.get(gh_project['columns_url'])
+    assert response.ok
+
+    columns = response.json()
+    assert len(columns) >= 2
+    return columns
+```
+
+The `project_columns` fixture uses *function* scope.
+In theory, columns could change during testing,
+so each test should fetch a fresh column list.
+It uses the `gh_context` fixture for making requests,
+and it uses the `gh_project` fixture to get project data.
+Thankfully, the project data includes a full endpoint URL to fetch the project's columns: `columns_url`.
+This fixture makes a `GET` request on that URL.
+Then, it verifies that the project has at least two columns before returning the column data.
+
+This fixture returns the full column data.
+However, for testing card creation, we only need a column ID.
+Let's make it simple to get column IDs directly with yet another fixture:
+
+```python
+@pytest.fixture()
+def project_column_ids(project_columns):
+    return list(map(lambda x: x['id'], project_columns))
+```
+
+The `project_column_ids` fixture uses the `map` function to get a list of IDs from the list of columns.
+We could have fetched the columns and mapped IDs in one fixture,
+but it is better to separate them into two fixtures because they represent separate concerns.
+Furthermore, while our current test only requires column IDs,
+other tests may need other values from column data.
+
+Now that all the setup is out of the way, let's automate the test!
+Create a new file named `tests/test_github_project.py`,
+and add the following import statement:
+
+```python
+import time
+```
+
+We'll need the `time` module to grab timestamps.
+
+Define a test function for our card creation test:
+
+```python
+def test_create_project_card(gh_context, project_column_ids):
+```
+
+Our test will need `gh_context` to make requests and `project_column_ids` to pick a project column.
+
+Every new card should have a note with a unique message
+so that we can find cards when we need to interact with them.
+One easy way to create unique messages is to append a timestamp value, like this:
+
+```python
+    now = time.time()
+    note = f'A new task at {now}'
+```
+
+Then, we can create a new card in our project via an API call like this:
+
+```python
+    c_response = gh_context.post(
+        f'/projects/columns/{project_column_ids[0]}/cards',
+        data={'note': note})
+    assert c_response.ok
+    assert c_response.json()['note'] == note
+```
+
+We use `gh_context` to make the `POST` request to the resource.
+The column for the card doesn't matter,
+so we can choose the first column for simplicity.
+Immediately after receiving the response,
+we should make sure the response is okay and that the card's note is correct.
+
+Finally, we should verify that the card was actually created successfully
+by attempting to `GET` the card using its ID:
+
+```python
+    card_id = c_response.json()['id']
+    r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
+    assert r_response.ok
+    assert r_response.json() == c_response.json()
+```
+
+The card's ID comes from the previous response.
+Again, we use `gh_context` to make the request,
+and we immediately verify the correctness of the response.
+The response data should be identical to the response data from the creation request.
+
+That completes our API-only card creation test!
+Here's the complete code for the `test_create_project_card` test function:
+
+```python
+import time
+
+def test_create_project_card(gh_context, project_column_ids):
+
+    # Prep test data
+    now = time.time()
+    note = f'A new task at {now}'
+
+    # Create a new card
+    c_response = gh_context.post(
+        f'/projects/columns/{project_column_ids[0]}/cards',
+        data={'note': note})
+    assert c_response.ok
+    assert c_response.json()['note'] == note
+
+    # Retrieve the newly created card
+    card_id = c_response.json()['id']
+    r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
+    assert r_response.ok
+    assert r_response.json() == c_response.json()
+```
+
+Run the new test module directly:
+
+```bash
+$ python3 -m pytest tests/test_github_project.py
+```
+
+Make sure all your environment variables are set correctly.
+The test should pass very quickly.
 
 
 ## Writing a hybrid UI/API test
