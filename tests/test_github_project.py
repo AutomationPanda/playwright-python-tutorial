@@ -42,14 +42,14 @@ def test_create_project_card(gh_context, project_column_ids):
 def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_username, gh_password):
 
     # Prep test data
-    col0 = project_column_ids[0]
-    col1 = project_column_ids[1]
+    source_col = project_column_ids[0]
+    dest_col = project_column_ids[1]
     now = time.time()
     note = f'Move this card at {now}'
 
     # Create a new card via API
     c_response = gh_context.post(
-        f'/projects/columns/{col0}/cards',
+        f'/projects/columns/{source_col}/cards',
         data={'note': note})
     assert c_response.ok
 
@@ -63,18 +63,18 @@ def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_
     page.goto(f'https://github.com/users/{gh_username}/projects/{gh_project["number"]}')
 
     # Verify the card appears in the first column
-    card_xpath = f'//div[@id="column-cards-{col0}"]//p[contains(text(), "{note}")]'
+    card_xpath = f'//div[@id="column-cards-{source_col}"]//p[contains(text(), "{note}")]'
     expect(page.locator(card_xpath)).to_be_visible()
 
     # Move a card to the second column via web UI
-    page.drag_and_drop(f'text="{note}"', f'id=column-cards-{col1}')
+    page.drag_and_drop(f'text="{note}"', f'id=column-cards-{dest_col}')
 
     # Verify the card is in the second column via UI
-    card_xpath = f'//div[@id="column-cards-{col1}"]//p[contains(text(), "{note}")]'
+    card_xpath = f'//div[@id="column-cards-{dest_col}"]//p[contains(text(), "{note}")]'
     expect(page.locator(card_xpath)).to_be_visible()
 
     # Verify the backend is updated via API
     card_id = c_response.json()['id']
     r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
     assert r_response.ok
-    assert r_response.json()['column_url'].endswith(str(col1))
+    assert r_response.json()['column_url'].endswith(str(dest_col))
