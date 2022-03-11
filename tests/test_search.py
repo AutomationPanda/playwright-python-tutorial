@@ -2,7 +2,6 @@
 These tests cover DuckDuckGo searches.
 """
 
-
 from playwright.sync_api import Page
 
 
@@ -11,8 +10,8 @@ def test_basic_duckduckgo_search(page: Page) -> None:
     page.goto('https://www.duckduckgo.com')
 
     # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
+    page.locator('#search_form_input_homepage').fill('panda')
+    page.locator('#search_button_homepage').click()
 
     # Then the search result query is the phrase
     # And the search result links pertain to the phrase
