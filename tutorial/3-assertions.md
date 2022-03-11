@@ -17,19 +17,20 @@ Here's the inspection panel for the search input element on the result page:
 This element also has an ID,
 so we can use the `#search_form_input` selector to uniquely identify it.
 
-To get the textual value inside this input element,
-you might think that we should use the
-[`inner_text`](https://playwright.dev/python/docs/api/class-page#page-inner-text) method
-or the [`text_content`](https://playwright.dev/python/docs/api/class-page#page-text-content) method.
-However, neither of these are correct.
-To get the value of an input element, you need to get its `value` attribute.
-Thankfully, Playwright provides a convenient method named
-[`input_value`](https://playwright.dev/python/docs/api/class-page#page-input-value) to get this.
+To verify the textual value inside this input element,
+we should use Playwright's `expect` function.
+`expect` connects page and locator calls to Playwright's assertions.
 
-Add the following line to the test case:
+Import the `expect` function like this:
 
 ```python
-    assert 'panda' == page.input_value('#search_form_input')
+    from playwright.sync_api import expect, Page
+```
+
+Then, add the following line to the test case:
+
+```python
+    expect(page.locator('#search_form_input')).to_have_value('panda')
 ```
 
 This line will get the input value from the target element and assert that it is equal to the original search phrase.
@@ -37,7 +38,9 @@ This line will get the input value from the target element and assert that it is
 The full test case should now look like this:
 
 ```python
-def test_basic_duckduckgo_search(page):
+from playwright.sync_api import expect, Page
+
+def test_basic_duckduckgo_search(page: Page) -> None:
 
     # Given the DuckDuckGo home page is displayed
     page.goto('https://www.duckduckgo.com')
@@ -47,7 +50,7 @@ def test_basic_duckduckgo_search(page):
     page.click('#search_button_homepage')
 
     # Then the search result query is the phrase
-    assert 'panda' == page.input_value('#search_form_input')
+    expect(page.locator('#search_form_input')).to_have_value('panda')
 
     # And the search result links pertain to the phrase
     # And the search result title contains the phrase
@@ -63,9 +66,17 @@ Is this a problem?
 Thankfully, in this case, there is no problem.
 Playwright automatically waits for elements to be ready before interacting with them.
 So, even though the test does not perform any *explicit* waiting for the result page,
-the `input_value` method performs *implicit* waiting for the element to be ready.
+the `expect` function performs *implicit* waiting for the element to satisfy the `to_have_value` condition.
 Check the [Auto-waiting](https://playwright.dev/python/docs/actionability) page
 for a full list of actionability checks for each interaction.
+
+> You could use the following assert statement for this verification:
+>  
+> `assert 'panda' == page.input_value('#search_form_input')`
+>  
+> However, while this call will wait for the element to appear,
+> it will not wait for the input value to become `'panda'`.
+> The recommended practice is to use `expect` with locator objects.
 
 Rerun the test using the same pytest command (`python3 -m pytest tests --headed --slowmo 1000`).
 This time, you should see the result page for a good second or two before the browser window closes.
@@ -110,7 +121,7 @@ Explicit waiting will be tricky.
 Add the following line to the test:
 
 ```python
-    page.locator('.result__title a.result__a >> nth=4').wait_for()
+    page.locator('.result__title a.result__a').nth(4).wait_for()
 ```
 
 Let's break this down:
@@ -120,9 +131,9 @@ Let's break this down:
    A `Locator` object can make many of the same calls as a page, like clicking and getting text.
    However, it can also make calls for explicit waiting and calls that target multiple elements.
 2. `.result__title a.result__a` is the selector for the result links.
-3. `>> nth=4` is an [N-th element selector](https://playwright.dev/python/docs/selectors#n-th-element-selector).
-   N-th element selectors are zero-indexed and may be appended to any selector.
-   In this `locator` call, it will fetch the fifth result link element.
+3. `nth(4)` is an [N-th element](https://playwright.dev/python/docs/api/class-locator#locator-nth) fetcher.
+   N-th element fetchers are zero-indexed and may be appended to any selector.
+   In this call, it will fetch the fifth result link element.
 4. [`wait_for`](https://playwright.dev/python/docs/api/class-locator#locator-wait-for)
    is a method that will wait for the target element to be visible.
 
@@ -168,20 +179,22 @@ Add this assertion to the test:
 The full test case should now look like this:
 
 ```python
-def test_basic_duckduckgo_search(page):
+from playwright.sync_api import expect, Page
 
+def test_basic_duckduckgo_search(page: Page) -> None:
+    
     # Given the DuckDuckGo home page is displayed
     page.goto('https://www.duckduckgo.com')
 
     # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
+    page.locator('#search_form_input_homepage').fill('panda')
+    page.locator('#search_button_homepage').click()
 
     # Then the search result query is the phrase
-    assert 'panda' == page.input_value('#search_form_input')
+    expect(page.locator('#search_form_input')).to_have_value('panda')
 
     # And the search result links pertain to the phrase
-    page.locator('.result__title a.result__a >> nth=4').wait_for()
+    page.locator('.result__title a.result__a').nth(4).wait_for()
     titles = page.locator('.result__title a.result__a').all_text_contents()
     matches = [t for t in titles if 'panda' in t.lower()]
     assert len(matches) > 0
@@ -201,13 +214,13 @@ Thankfully, this one will be short.
 
 The page title is an attribute of the page.
 It is not associated with any element on the page.
-We can use the [`title`](https://playwright.dev/python/docs/api/class-page#page-title) method
-to access it directly.
+We can use the [`title`](https://playwright.dev/python/docs/api/class-page#page-title) method to access it directly.
+For assertions, we should use `expect` with the `to_have_title` condition.
 
 Add the following line to the test:
 
 ```python
-    assert 'panda' in page.title()
+    expect(page).to_have_title('panda at DuckDuckGo')
 ```
 
 This will make sure the search phrase appears in the page title.
@@ -217,26 +230,28 @@ Make sure the page is fully loaded first.
 The full test case should now look like this:
 
 ```python
-def test_basic_duckduckgo_search(page):
+from playwright.sync_api import expect, Page
 
+def test_basic_duckduckgo_search(page: Page) -> None:
+    
     # Given the DuckDuckGo home page is displayed
     page.goto('https://www.duckduckgo.com')
 
     # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
+    page.locator('#search_form_input_homepage').fill('panda')
+    page.locator('#search_button_homepage').click()
 
     # Then the search result query is the phrase
-    assert 'panda' == page.input_value('#search_form_input')
+    expect(page.locator('#search_form_input')).to_have_value('panda')
 
     # And the search result links pertain to the phrase
-    page.locator('.result__title a.result__a >> nth=4').wait_for()
+    page.locator('.result__title a.result__a').nth(4).wait_for()
     titles = page.locator('.result__title a.result__a').all_text_contents()
     matches = [t for t in titles if 'panda' in t.lower()]
     assert len(matches) > 0
 
     # And the search result title contains the phrase
-    assert 'panda' in page.title()
+    expect(page).to_have_title('panda at DuckDuckGo')
 ```
 
 We can remove the `pass` statement at the end now.
@@ -244,11 +259,6 @@ We can remove the `pass` statement at the end now.
 Rerun the test again to make sure it works.
 If it does, congrats!
 You have just completed a full test case in Python using Playwright with pytest.
-
-Playwright's [`Page`](https://playwright.dev/python/docs/api/class-page) class
-provides several methods for interacting with pages and getting state from them.
-Read the docs to familiarize yourself with them.
-`Page` provides methods to interact with *every* type of web element.
 
 Notice how concise this code is.
 Unfortunately, it's not very reusable.
