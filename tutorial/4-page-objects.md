@@ -47,37 +47,32 @@ We will use much of our original code.
 
 A page object class typically has three main parts:
 
-1. Selectors and any other data stored as variables
-2. Dependency injection of the browser automator through a constructor
+1. Dependency injection of the browser automator through a constructor
+2. Locators and any other data stored as variables
 3. Interaction methods that use the browser automator and the selectors
 
 Let's add these one at a time.
-Inside `pages/search.py`, add a class definition for the page object:
+Inside `pages/search.py`, import Playwright's `Page` class:
+
+```python
+from playwright.sync_api import Page
+```
+
+Add a class definition for the page object:
 
 ```python
 class DuckDuckGoSearchPage:
 ```
 
-Inside this class, add the selectors we used in our test for the search input and search button:
-
-```python
-    SEARCH_BUTTON = '#search_button_homepage'
-    SEARCH_INPUT = '#search_form_input_homepage'
-```
-
-These will be class variables, not instance variables.
-They are also plain-old strings.
-We could use these selectors for many different actions.
-
-Let's also add the DuckDuckGo URL:
+Inside this class, add the DuckDuckGo URL:
 
 ```python
     URL = 'https://www.duckduckgo.com'
 ```
 
-*(Warning:
-Base URLs should typically be passed into automation code as an input, not hard-coded in a page object.
-We are doing this here as a matter of simplicity for this tutorial.)*
+> *Warning:*
+> Base URLs should typically be passed into automation code as an input, not hard-coded in a page object.
+> We are doing this here as a matter of simplicity for this tutorial.
 
 Next, let's handle dependency injection for the browser automator.
 Since each test will have its own Playwright page, we should inject that page.
@@ -85,7 +80,7 @@ Since each test will have its own Playwright page, we should inject that page.
 Add the following initializer method to the class:
 
 ```python
-    def __init__(self, page):
+    def __init__(self, page: Page) -> None:
         self.page = page
 ```
 
@@ -94,12 +89,22 @@ The `__init__` method is essentially a constructor for Python classes
 It has one argument named `page` for the Playwright page,
 which it stores as an instance variable (via `self`).
 
-With the page injected, we can now use it to make interactions.
+Let's also add locators for search page elements to the constructor.
+Our test needs locators for the search button and the search input:
+
+```python
+        self.search_button = page.locator('#search_button_homepage')
+        self.search_input = page.locator('#search_form_input_homepage')
+```
+
+These locators are created once and can be used anywhere.
+We can use them to make interactions.
+
 One interaction our test performs is loading the DuckDuckGo search page.
 Here's a method to do that:
 
 ```python
-    def load(self):
+    def load(self) -> None:
         self.page.goto(self.URL)
 ```
 
@@ -109,51 +114,48 @@ The other interaction our test performs is searching for a phrase.
 Here's a method to do that:
 
 ```python
-    def search(self, phrase):
-        self.page.fill(self.SEARCH_INPUT, phrase)
-        self.page.click(self.SEARCH_BUTTON)
+    def search(self, phrase: str) -> None:
+        self.search_input.fill(phrase)
+        self.search_button.click()
 ```
 
-This `search` method uses the injected page and the selector variables.
+This `search` method uses the page objects to perform the search.
 It also takes in the search phrase as an argument so that it can handle any phrase.
 
 The completed search page object class should look like this:
 
 ```python
-class DuckDuckGoSearchPage:
+from playwright.sync_api import Page
 
-    SEARCH_BUTTON = '#search_button_homepage'
-    SEARCH_INPUT = '#search_form_input_homepage'
+class DuckDuckGoSearchPage:
 
     URL = 'https://www.duckduckgo.com'
 
-    def __init__(self, page):
+    def __init__(self, page: Page) -> None:
         self.page = page
+        self.search_button = page.locator('#search_button_homepage')
+        self.search_input = page.locator('#search_form_input_homepage')
     
-    def load(self):
+    def load(self) -> None:
         self.page.goto(self.URL)
     
-    def search(self, phrase):
-        self.page.fill(self.SEARCH_INPUT, phrase)
-        self.page.click(self.SEARCH_BUTTON)
+    def search(self, phrase: str) -> None:
+        self.search_input.fill(phrase)
+        self.search_button.click()
 ```
-
-This diagram shows how each section of this class fits the standard sections of a page object class:
-
-![Page object structure](images/page-object-structure.png)
 
 We can now refactor the original test case to use this new page object!
 Replace this old code:
 
 ```python
-def test_basic_duckduckgo_search(page):
-
+def test_basic_duckduckgo_search(page: Page) -> None:
+    
     # Given the DuckDuckGo home page is displayed
     page.goto('https://www.duckduckgo.com')
 
     # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
+    page.locator('#search_form_input_homepage').fill('panda')
+    page.locator('#search_button_homepage').click()
 ```
 
 With this new code:
@@ -161,9 +163,9 @@ With this new code:
 ```python
 from pages.search import DuckDuckGoSearchPage
 
-def test_basic_duckduckgo_search(page):
+def test_basic_duckduckgo_search(page: Page) -> None:
     search_page = DuckDuckGoSearchPage(page)
-
+    
     # Given the DuckDuckGo home page is displayed
     search_page.load()
 
@@ -190,37 +192,34 @@ It will follow the same structure.
 The main difference is that each interaction methods in the result page class will return a value
 because test assertions will check page values.
 
-Start by adding the class definition to `pages/result.py`:
+Start by adding the following imports for type checking to `pages/result.py`:
+
+```python
+from playwright.sync_api import Page
+from typing import List
+```
+
+Add the class definition:
 
 ```python
 class DuckDuckGoResultPage:
 ```
 
-Add the selectors we used in the test case:
+Add dependency injection with locators:
 
 ```python
-    RESULT_LINKS = '.result__title a.result__a'
-    SEARCH_INPUT = '#search_form_input'
-```
-
-Add dependency injection:
-
-```python
-    def __init__(self, page):
+    def __init__(self, page: Page) -> None:
         self.page = page
+        self.result_links = page.locator('.result__title a.result__a')
+        self.search_input = page.locator('#search_form_input')
 ```
 
-Now, let's add interaction methods for all the things assertions must check.
-The first assertion checked the input value of the search input.
-Let's add a method to get and return that input value:
-
-```python
-    def search_input_value(self):
-        return self.page.input_value(self.SEARCH_INPUT)
-```
-
-The second assertion was the most complex.
-It checked if at least one result link title contained the search phrase.
+Now, let's add interaction methods.
+Since the verifications for the search input and title are simple,
+we don't need new methods for those.
+The test case function can call the `search_input` locator and the `page` object directly for those.
+However, the verification for search result links has some complex code
+that should be handled within the page object.
 We can break this down into two methods:
 
 1. A method to get all result link titles as a list.
@@ -229,20 +228,21 @@ We can break this down into two methods:
 Add the following methods to the class:
 
 ```python
-    def result_link_titles(self):
-        self.page.locator(f'{self.RESULT_LINKS} >> nth=4').wait_for()
-        titles = self.page.locator(self.RESULT_LINKS).all_text_contents()
-        return titles
+    def result_link_titles(self) -> List[str]:
+        self.result_links.nth(4).wait_for()
+        return self.result_links.all_text_contents()
     
-    def result_link_titles_contain_phrase(self, phrase, minimum=1):
+    def result_link_titles_contain_phrase(self, phrase: str, minimum: int = 1) -> bool:
         titles = self.result_link_titles()
         matches = [t for t in titles if phrase.lower() in t.lower()]
         return len(matches) >= minimum
 ```
 
-In the first method, the `RESULT_LINKS` selector is used twice.
-The first time it is used, it is concatenated with the N-th element selector using an
-[f-string](https://realpython.com/python-f-strings/).
+In the first method, the `result_links` locator is used twice.
+The first time it is called,
+it is concatenated with the N-th element fetcher to wait for at least 5 elements to appear.
+The second time it is called,
+it gets all the text contents for the elements it finds.
 
 The second method takes in a search phases and a minimum limit for matches.
 It calls the first method to get the list of titles,
@@ -252,41 +252,28 @@ Notice that this method does **not** perform an asssertion.
 Assertions should *not* be done in page objects.
 They should only be done in test cases.
 
-The third assertion checked the page title.
-Let's add one final method to the result page class to get the title:
-
-```python
-    def title(self):
-        return self.page.title()
-```
-
 The full code for `pages/result.py` should look like this
 (after rearranging methods alphabetically):
 
 ```python
+from playwright.sync_api import Page
+from typing import List
+
 class DuckDuckGoResultPage:
 
-    RESULT_LINKS = '.result__title a.result__a'
-    SEARCH_INPUT = '#search_form_input'
-    
-    def __init__(self, page):
+    def __init__(self, page: Page) -> None:
         self.page = page
+        self.result_links = page.locator('.result__title a.result__a')
+        self.search_input = page.locator('#search_form_input')
     
-    def result_link_titles(self):
-        self.page.locator(f'{self.RESULT_LINKS} >> nth=4').wait_for()
-        titles = self.page.locator(self.RESULT_LINKS).all_text_contents()
-        return titles
+    def result_link_titles(self) -> List[str]:
+        self.result_links.nth(4).wait_for()
+        return self.result_links.all_text_contents()
     
-    def result_link_titles_contain_phrase(self, phrase, minimum=1):
+    def result_link_titles_contain_phrase(self, phrase: str, minimum: int = 1) -> bool:
         titles = self.result_link_titles()
         matches = [t for t in titles if phrase.lower() in t.lower()]
         return len(matches) >= minimum
-
-    def search_input_value(self):
-        return self.page.input_value(self.SEARCH_INPUT)
-    
-    def title(self):
-        return self.page.title()
 ```
 
 After rewriting the original test case to use `DuckDuckGoResultPage`,
@@ -295,8 +282,9 @@ the code in `tests/test_search.py` should look like this:
 ```python
 from pages.result import DuckDuckGoResultPage
 from pages.search import DuckDuckGoSearchPage
+from playwright.sync_api import expect, Page
 
-def test_basic_duckduckgo_search(page):
+def test_basic_duckduckgo_search(page: Page) -> None:
     search_page = DuckDuckGoSearchPage(page)
     result_page = DuckDuckGoResultPage(page)
 
@@ -307,13 +295,13 @@ def test_basic_duckduckgo_search(page):
     search_page.search('panda')
 
     # Then the search result query is the phrase
-    assert 'panda' == result_page.search_input_value()
+    expect(result_page.search_input).to_have_value('panda')
 
     # And the search result links pertain to the phrase
     assert result_page.result_link_titles_contain_phrase('panda')
 
     # And the search result title contains the phrase
-    assert 'panda' in result_page.title()
+    expect(page).to_have_title('panda at DuckDuckGo')
 ```
 
 These calls look less "code-y" than the raw Playwright calls.
@@ -352,13 +340,14 @@ import pytest
 
 from pages.result import DuckDuckGoResultPage
 from pages.search import DuckDuckGoSearchPage
+from playwright.sync_api import Page
 
 @pytest.fixture
-def result_page(page):
+def result_page(page: Page) -> DuckDuckGoResultPage:
     return DuckDuckGoResultPage(page)
 
 @pytest.fixture
-def search_page(page):
+def search_page(page: Page) -> DuckDuckGoSearchPage:
     return DuckDuckGoSearchPage(page)
 ```
 
@@ -374,8 +363,15 @@ You can learn more about fixtures from the
 To use these new fixtures, rewrite `tests/test_search.py` like this:
 
 ```python
-def test_basic_duckduckgo_search(search_page, result_page):
+from pages.result import DuckDuckGoResultPage
+from pages.search import DuckDuckGoSearchPage
+from playwright.sync_api import expect, Page
 
+def test_basic_duckduckgo_search(
+    page: Page,
+    search_page: DuckDuckGoSearchPage,
+    result_page: DuckDuckGoResultPage) -> None:
+    
     # Given the DuckDuckGo home page is displayed
     search_page.load()
 
@@ -383,24 +379,23 @@ def test_basic_duckduckgo_search(search_page, result_page):
     search_page.search('panda')
 
     # Then the search result query is the phrase
-    assert 'panda' == result_page.search_input_value()
+    expect(result_page.search_input).to_have_value('panda')
 
     # And the search result links pertain to the phrase
     assert result_page.result_link_titles_contain_phrase('panda')
 
     # And the search result title contains the phrase
-    assert 'panda' in result_page.title()
+    expect(page).to_have_title('panda at DuckDuckGo')
 ```
 
 Notice a few things:
 
-* This test module no longer needs to import the page object classes from the `pages` module.
 * The `search_page` and `result_page` fixtures are declared as arguments for the test function.
 * The test function no longer explicitly constructs page objects.
-* The Playwright `page` fixture is no longer declared because it is no longer called directly by the test function.
+* Each test step is only one line long.
 
 If you use page objects, then **all interactions should be performed using page objects**.
-It is not recommended to mix raw Playwright calls with page object calls.
+It is not recommended to mix raw Playwright calls (except `expect` assertions) with page object calls.
 That becomes confusing, and it encourages poor practices like dirty hacks and copypasta.
 It also causes a test automation project to lose strength from a lack of conformity in design.
 
