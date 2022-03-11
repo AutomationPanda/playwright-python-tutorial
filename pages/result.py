@@ -3,26 +3,22 @@ This module contains DuckDuckGoResultPage,
 the page object for the DuckDuckGo result page.
 """
 
+from playwright.sync_api import Page
+from typing import List
+
+
 class DuckDuckGoResultPage:
 
-    RESULT_LINKS = '.result__title a.result__a'
-    SEARCH_INPUT = '#search_form_input'
-    
-    def __init__(self, page):
+    def __init__(self, page: Page) -> None:
         self.page = page
+        self.result_links = page.locator('.result__title a.result__a')
+        self.search_input = page.locator('#search_form_input')
     
-    def result_link_titles(self):
-        self.page.locator(f'{self.RESULT_LINKS} >> nth=4').wait_for()
-        titles = self.page.locator(self.RESULT_LINKS).all_text_contents()
-        return titles
+    def result_link_titles(self) -> List[str]:
+        self.result_links.nth(4).wait_for()
+        return self.result_links.all_text_contents()
     
-    def result_link_titles_contain_phrase(self, phrase, minimum=1):
+    def result_link_titles_contain_phrase(self, phrase: str, minimum: int = 1) -> bool:
         titles = self.result_link_titles()
         matches = [t for t in titles if phrase.lower() in t.lower()]
         return len(matches) >= minimum
-
-    def search_input_value(self):
-        return self.page.input_value(self.SEARCH_INPUT)
-    
-    def title(self):
-        return self.page.title()
