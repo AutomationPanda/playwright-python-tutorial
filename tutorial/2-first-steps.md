@@ -58,16 +58,22 @@ You do not need to explicitly close the browser.
 > Asynchronous calls could be useful for other types of automation, such as web scraping.
 
 Let's update our test stub to call the `page` fixture.
-In `tests/test_search.py`, change the test function signature from this:
+In `tests/test_search.py`, add the following import statement:
 
 ```python
-def test_basic_duckduckgo_search():
+from playwright.sync_api import Page
+```
+
+Then, change the test function signature from this:
+
+```python
+def test_basic_duckduckgo_search() -> None:
 ```
 
 To this:
 
 ```python
-def test_basic_duckduckgo_search(page):
+def test_basic_duckduckgo_search(page: Page) -> None:
 ```
 
 Now the test has access to a fresh page in a new browser context.
@@ -172,22 +178,32 @@ Here's the inspection panel for the search input element:
 Thankfully, this element has an ID.
 We can use the selector `#search_form_input_homepage` to uniquely identify this element.
 
-To enter text into this input element, we must use Playwright's
-[`fill`](https://playwright.dev/python/docs/api/class-page#page-fill) method.
+To interact with elements with Playwright, we must use [locators](https://playwright.dev/python/docs/locators).
+The [Locator](https://playwright.dev/python/docs/next/api/class-locator) class
+takes in a selector and produces an object that can interact with the target element.
+
+For example, to enter text into this input element, we must use `Locator`'s
+[`fill`](https://playwright.dev/python/docs/next/api/class-locator#locator-fill) method.
 Append the following line to the test case:
 
 ```python
-    page.fill('#search_form_input_homepage', 'panda')
+    page.locator('#search_form_input_homepage').fill('panda')
 ```
 
 > Since `search_form_input_homepage` is an ID, we could also use Playwright's
 > [ID attribute selector](https://playwright.dev/python/docs/selectors#id-data-testid-data-test-id-data-test-selectors):
 >  
-> `page.fill('id=search_form_input_homepage', 'panda')`
+> `page.locator('id=search_form_input_homepage').fill('panda')`
 
-Using Selenium WebDriver, we would need to locate the element and then send the interaction to it.
-However, in Playwright, these two parts are combined into a single call.
-Furthermore, Playwright waits for the target element to be visible and editable before it attempts to enter the text.
+> Playwright's `Page` class also provides methods for element interactions like this:
+>  
+> `page.fill('#search_form_input_homepage', 'panda')`
+>  
+> However, using locators is recommended over direct page calls.
+> Locators use "strict" mode - a locator raises an exception if its selector finds more than one element.
+> Locators are also more reusable, especially when using page object classes.
+
+Playwright waits for the target element to be visible and editable before it attempts to enter the text.
 We are arbitrarily using the phrase `'panda'` as our search phrase because, well, why not?
 
 Let's handle the second part of the interaction: clicking the search button.
@@ -198,11 +214,11 @@ Here's the inspection panel for the search button:
 This element also has an ID: `#search_button_homepage`. Nice!
 
 To click an element, we must use Playwright's
-[`click`](https://playwright.dev/python/docs/api/class-page#page-click) method.
+[`click`](https://playwright.dev/python/docs/next/api/class-locator#locator-click) method.
 Append the following line to the test case:
 
 ```python
-    page.click('#search_button_homepage')
+    page.locator('#search_button_homepage').click()
 ```
 
 Again, Playwright is nice and concise.
@@ -211,14 +227,15 @@ The `click` method waits for the target element to be ready to receive clicks, t
 Our test case should now look like this:
 
 ```python
-def test_basic_duckduckgo_search(page):
+from playwright.sync_api import Page
 
+def test_basic_duckduckgo_search(page: Page) -> None:
     # Given the DuckDuckGo home page is displayed
     page.goto('https://www.duckduckgo.com')
 
     # When the user searches for a phrase
-    page.fill('#search_form_input_homepage', 'panda')
-    page.click('#search_button_homepage')
+    page.locator('#search_form_input_homepage').fill('panda')
+    page.locator('#search_button_homepage').click()
 
     # Then the search result query is the phrase
     # And the search result links pertain to the phrase
@@ -231,5 +248,7 @@ Now, you should see the test actually perform the search!
 
 Navigation, input filling, and clicking are only three of many page interactions you can do with Playwright.
 Anything a user can do on a web page, Playwright can do as well.
-Check out the Playwright [Page](https://playwright.dev/python/docs/api/class-page) API to see *all* methods and attributes.
+Check out the Playwright [Page](https://playwright.dev/python/docs/api/class-page)
+and [Locator](https://playwright.dev/python/docs/next/api/class-locator) classes
+to see *all* methods and attributes.
 We will use more of these calls in the next tutorial parts.

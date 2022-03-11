@@ -2,8 +2,11 @@
 These tests cover DuckDuckGo searches.
 """
 
-def test_basic_duckduckgo_search(search_page, result_page):
+from playwright.sync_api import expect, Page
 
+
+def test_basic_duckduckgo_search(search_page, result_page) -> None:
+    
     # Given the DuckDuckGo home page is displayed
     search_page.load()
 
@@ -18,3 +21,4 @@ def test_basic_duckduckgo_search(search_page, result_page):
 
     # And the search result title contains the phrase
     assert 'panda' in result_page.title()
+
