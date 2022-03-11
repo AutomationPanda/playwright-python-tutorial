@@ -3,8 +3,10 @@ These tests cover DuckDuckGo searches.
 """
 
 
-def test_basic_duckduckgo_search(page):
+from playwright.sync_api import Page
 
+
+def test_basic_duckduckgo_search(page: Page) -> None:
     # Given the DuckDuckGo home page is displayed
     page.goto('https://www.duckduckgo.com')
 
