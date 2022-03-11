@@ -82,7 +82,7 @@ Add the following function for reading environment variables to `tests/conftest.
 ```python
 import os
 
-def _get_env_var(varname):
+def _get_env_var(varname: str) -> str:
     value = os.getenv(varname)
     assert value, f'{varname} is not set'
     return value
@@ -94,19 +94,19 @@ Then, add fixtures for each environment variable:
 
 ```python
 @pytest.fixture(scope='session')
-def gh_username():
+def gh_username() -> str:
     return _get_env_var('GITHUB_USERNAME')
 
 @pytest.fixture(scope='session')
-def gh_password():
+def gh_password() -> str:
     return _get_env_var('GITHUB_PASSWORD')
 
 @pytest.fixture(scope='session')
-def gh_access_token():
+def gh_access_token() -> str:
     return _get_env_var('GITHUB_ACCESS_TOKEN')
 
 @pytest.fixture(scope='session')
-def gh_project_name():
+def gh_project_name() -> str:
     return _get_env_var('GITHUB_PROJECT_NAME')
 ```
 
@@ -122,8 +122,14 @@ tailored to GitHub API requests.
 Add the following fixture to `tests/conftest.py` to build a request context object for the GitHub API:
 
 ```python
+from playwright.sync_api import Playwright, APIRequestContext
+from typing import Generator
+
 @pytest.fixture(scope='session')
-def gh_context(playwright, gh_access_token):
+def gh_context(
+    playwright: Playwright,
+    gh_access_token: str) -> Generator[APIRequestContext, None, None]:
+
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "Authorization": f"token {gh_access_token}"}
@@ -195,11 +201,17 @@ Let's write a fixture for the first request to find the target project.
 Add this code to `conftest.py`:
 
 ```python
+from playwright.sync_api import expect
+
 @pytest.fixture(scope='session')
-def gh_project(gh_context, gh_username, gh_project_name):
+def gh_project(
+    gh_context: APIRequestContext,
+    gh_username: str,
+    gh_project_name: str) -> dict:
+
     resource = f'/users/{gh_username}/projects'
     response = gh_context.get(resource)
-    assert response.ok
+    expect(response).to_be_ok()
     
     name_match = lambda x: x['name'] == gh_project_name
     filtered = filter(name_match, response.json())
@@ -216,7 +228,7 @@ and it uses the `gh_username` and `gh_project_name` fixtures for finding the tar
 To get a list of all your projects,
 it makes a `GET` request to `/users/{gh_username}/projects` using `gh_context`,
 which automatically includes the base URL, headers, and authentication.
-The subsequent `assert response.ok` command makes sure the request was successful.
+The subsequent `expect(response).to_be_ok()` call makes sure the request was successful.
 If anything went wrong, tests would abort immediately.
 
 The resulting response will contain a list of *all* user projects.
@@ -228,9 +240,12 @@ Add the following code to `conftest.py`:
 
 ```python
 @pytest.fixture()
-def project_columns(gh_context, gh_project):
+def project_columns(
+    gh_context: APIRequestContext,
+    gh_project: dict) -> list[dict]:
+    
     response = gh_context.get(gh_project['columns_url'])
-    assert response.ok
+    expect(response).to_be_ok()
 
     columns = response.json()
     assert len(columns) >= 2
@@ -252,7 +267,7 @@ Let's make it simple to get column IDs directly with yet another fixture:
 
 ```python
 @pytest.fixture()
-def project_column_ids(project_columns):
+def project_column_ids(project_columns: list[dict]) -> list[str]:
     return list(map(lambda x: x['id'], project_columns))
 ```
 
@@ -268,14 +283,18 @@ and add the following import statement:
 
 ```python
 import time
+from playwright.sync_api import APIRequestContext, Page, expect
 ```
 
 We'll need the `time` module to grab timestamps.
+We'll need the Playwright stuff for type checking and assertions.
 
 Define a test function for our card creation test:
 
 ```python
-def test_create_project_card(gh_context, project_column_ids):
+def test_create_project_card(
+    gh_context: APIRequestContext,
+    project_column_ids: list[str]) -> None:
 ```
 
 Our test will need `gh_context` to make requests and `project_column_ids` to pick a project column.
@@ -295,7 +314,7 @@ Then, we can create a new card in our project via an API call like this:
     c_response = gh_context.post(
         f'/projects/columns/{project_column_ids[0]}/cards',
         data={'note': note})
-    assert c_response.ok
+    expect(c_response).to_be_ok()
     assert c_response.json()['note'] == note
 ```
 
@@ -311,7 +330,7 @@ by attempting to `GET` the card using its ID:
 ```python
     card_id = c_response.json()['id']
     r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
-    assert r_response.ok
+    expect(r_response).to_be_ok()
     assert r_response.json() == c_response.json()
 ```
 
@@ -325,8 +344,11 @@ Here's the complete code for the `test_create_project_card` test function:
 
 ```python
 import time
+from playwright.sync_api import APIRequestContext, Page, expect
 
-def test_create_project_card(gh_context, project_column_ids):
+def test_create_project_card(
+    gh_context: APIRequestContext,
+    project_column_ids: list[str]) -> None:
 
     # Prep test data
     now = time.time()
@@ -336,13 +358,13 @@ def test_create_project_card(gh_context, project_column_ids):
     c_response = gh_context.post(
         f'/projects/columns/{project_column_ids[0]}/cards',
         data={'note': note})
-    assert c_response.ok
+    expect(c_response).to_be_ok()
     assert c_response.json()['note'] == note
 
     # Retrieve the newly created card
     card_id = c_response.json()['id']
     r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
-    assert r_response.ok
+    expect(r_response).to_be_ok()
     assert r_response.json() == c_response.json()
 ```
 
@@ -376,18 +398,16 @@ Tests can run individually or out of order.
 We should not create any interdependencies between individual test cases.
 
 Let's dive directly into the test case.
-
-We'll need to use Playwright's `expect` function for some of our new assertions.
-Add this import statement to `tests/test_github_project.py`:
-
-```python
-from playwright.sync_api import expect
-```
-
 Add a new test function with all these fixtures:
 
 ```python
-def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_username, gh_password):
+def test_move_project_card(
+    gh_context: APIRequestContext,
+    gh_project: dict,
+    project_column_ids: list[str],
+    page: Page,
+    gh_username: str,
+    gh_password: str) -> None:
 ```
 
 Moving a card requires two columns: the source column and the destination column.
@@ -412,7 +432,7 @@ The code to create a card via the GitHub API is pretty much the same as before, 
     c_response = gh_context.post(
         f'/projects/columns/{source_col}/cards',
         data={'note': note})
-    assert c_response.ok
+    expect(c_response).to_be_ok()
 ```
 
 Now, it's time to switch from API to UI.
@@ -489,7 +509,7 @@ Let's `GET` that card's most recent data via the API:
 ```python
     card_id = c_response.json()['id']
     r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
-    assert r_response.ok
+    expect(r_response).to_be_ok()
     assert r_response.json()['column_url'].endswith(str(dest_col))
 ```
 
@@ -499,9 +519,15 @@ Here's the completed test code for `test_move_project_card`:
 
 ```python
 import time
-from playwright.sync_api import expect
+from playwright.sync_api import APIRequestContext, Page, expect
 
-def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_username, gh_password):
+def test_move_project_card(
+    gh_context: APIRequestContext,
+    gh_project: dict,
+    project_column_ids: list[str],
+    page: Page,
+    gh_username: str,
+    gh_password: str) -> None:
 
     # Prep test data
     source_col = project_column_ids[0]
@@ -513,7 +539,7 @@ def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_
     c_response = gh_context.post(
         f'/projects/columns/{source_col}/cards',
         data={'note': note})
-    assert c_response.ok
+    expect(c_response).to_be_ok()
 
     # Log in via UI
     page.goto(f'https://github.com/login')
@@ -538,7 +564,7 @@ def test_move_project_card(gh_context, gh_project, project_column_ids, page, gh_
     # Verify the backend is updated via API
     card_id = c_response.json()['id']
     r_response = gh_context.get(f'/projects/columns/cards/{card_id}')
-    assert r_response.ok
+    expect(r_response).to_be_ok()
     assert r_response.json()['column_url'].endswith(str(dest_col))
 ```
 
