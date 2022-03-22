@@ -63,9 +63,9 @@ def test_move_project_card(
 
     # Log in via UI
     page.goto(f'https://github.com/login')
-    page.fill('id=login_field', gh_username)
-    page.fill('id=password', gh_password)
-    page.click('input[name="commit"]')
+    page.locator('id=login_field').fill(gh_username)
+    page.locator('id=password').fill(gh_password)
+    page.locator('input[name="commit"]').click()
 
     # Load the project page
     page.goto(f'https://github.com/users/{gh_username}/projects/{gh_project["number"]}')
