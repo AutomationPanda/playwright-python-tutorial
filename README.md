@@ -53,7 +53,7 @@ Feel free to open issues against this repository if you have any trouble complet
 I also have given (or will be giving) this tutorial as a live workshop at the following events:
 
 * [TAU: The Homecoming](https://applitools.com/on-demand-videos/tau-the-homecoming-2021/) (December 1, 2021)
-* [Python Web Conference 2022](https://2022.pythonwebconf.com/tutorials/end-to-end-testing-with-playwright) (March 22, 2021)
+* [Python Web Conference 2022](https://2022.pythonwebconf.com/tutorials/end-to-end-testing-with-playwright) (March 22, 2022)
 * [STAREast 2022](https://stareast.techwell.com/program/tutorials/web-ui-testing-playwright-python-stareast-2022) (April 26, 2022)
 * [PyCon US 2022](https://us.pycon.org/2022/schedule/presentation/35/) (April 28, 2022)
 
