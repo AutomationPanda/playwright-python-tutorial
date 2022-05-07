@@ -99,10 +99,9 @@ Here's the inspection panel for result links:
 
 ![Inspecting the result link elements](images/inspect-result-links.png)
 
-Result links are `a` elements with the class `result__a`.
-They are under `h2` elements with the class `result__title`.
-We could use the selector `.result__title a.result__a` to identify all result links on the page.
-(If you look in the DevTools search bar, you'll see that this selector locates 10 elements.)
+Result links are `a` elements with a `data-testid` attribute set to `"result-title-a"`.
+We could use the CSS selector `a[data-testid="result-title-a"]` to identify all result links on the page.
+(If you look in the DevTools search bar, you'll see that this selector locates 12 elements.)
 
 Since we can get all elements with one selector,
 we can take the following steps to verify that search result links pertain to the phrase:
@@ -121,7 +120,7 @@ Explicit waiting will be tricky.
 Add the following line to the test:
 
 ```python
-    page.locator('.result__title a.result__a').nth(4).wait_for()
+    page.locator('a[data-testid="result-title-a"]').nth(4).wait_for()
 ```
 
 Let's break this down:
@@ -130,7 +129,7 @@ Let's break this down:
    [`Locator`](https://playwright.dev/python/docs/api/class-locator) object for the target element.
    A `Locator` object can make many of the same calls as a page, like clicking and getting text.
    However, it can also make calls for explicit waiting and calls that target multiple elements.
-2. `.result__title a.result__a` is the selector for the result links.
+2. `a[data-testid="result-title-a"]` is the selector for the result links.
 3. `nth(4)` is an [N-th element](https://playwright.dev/python/docs/api/class-locator#locator-nth) fetcher.
    N-th element fetchers are zero-indexed and may be appended to any selector.
    In this call, it will fetch the fifth result link element.
@@ -145,7 +144,7 @@ Waiting for five links to appear should be good enough for our testing purposes.
 After the links appear, we can scrape their text contents like this:
 
 ```python
-    titles = page.locator('.result__title a.result__a').all_text_contents()
+    titles = page.locator('a[data-testid="result-title-a"]').all_text_contents()
 ```
 
 Again, we must use the `locator` method because we want to target a list of elements instead of one.
@@ -194,8 +193,8 @@ def test_basic_duckduckgo_search(page: Page) -> None:
     expect(page.locator('#search_form_input')).to_have_value('panda')
 
     # And the search result links pertain to the phrase
-    page.locator('.result__title a.result__a').nth(4).wait_for()
-    titles = page.locator('.result__title a.result__a').all_text_contents()
+    page.locator('a[data-testid="result-title-a"]').nth(4).wait_for()
+    titles = page.locator('a[data-testid="result-title-a"]').all_text_contents()
     matches = [t for t in titles if 'panda' in t.lower()]
     assert len(matches) > 0
 
@@ -245,8 +244,8 @@ def test_basic_duckduckgo_search(page: Page) -> None:
     expect(page.locator('#search_form_input')).to_have_value('panda')
 
     # And the search result links pertain to the phrase
-    page.locator('.result__title a.result__a').nth(4).wait_for()
-    titles = page.locator('.result__title a.result__a').all_text_contents()
+    page.locator('a[data-testid="result-title-a"]').nth(4).wait_for()
+    titles = page.locator('a[data-testid="result-title-a"]').all_text_contents()
     matches = [t for t in titles if 'panda' in t.lower()]
     assert len(matches) > 0
 

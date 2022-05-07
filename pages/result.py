@@ -11,7 +11,7 @@ class DuckDuckGoResultPage:
 
     def __init__(self, page: Page) -> None:
         self.page = page
-        self.result_links = page.locator('.result__title a.result__a')
+        self.result_links = page.locator('a[data-testid="result-title-a"]')
         self.search_input = page.locator('#search_form_input')
     
     def result_link_titles(self) -> List[str]:
