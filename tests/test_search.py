@@ -18,8 +18,8 @@ def test_basic_duckduckgo_search(page: Page) -> None:
     expect(page.locator('#search_form_input')).to_have_value('panda')
 
     # And the search result links pertain to the phrase
-    page.locator('.result__title a.result__a').nth(4).wait_for()
-    titles = page.locator('.result__title a.result__a').all_text_contents()
+    page.locator('a[data-testid="result-title-a"]').nth(4).wait_for()
+    titles = page.locator('a[data-testid="result-title-a"]').all_text_contents()
     matches = [t for t in titles if 'panda' in t.lower()]
     assert len(matches) > 0
 
