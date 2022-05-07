@@ -2,40 +2,49 @@
 This module contains DuckDuckGo Tasks.
 """
 
+from abc import ABC, abstractmethod
 from interactions.duckduckgo.pages import ResultPage, SearchPage
 from interactions.duckduckgo.questions import result_link_titles
 from playwright.sync_api import Page, expect
 from screenplay.pattern import Actor, Task
 
 
-class load_duckduckgo(Task):
+class PlaywrightTask(Task, ABC):
+
+    @abstractmethod
+    def perform_on_page(self, actor: Actor, page: Page) -> None:
+        pass
 
     def perform_as(self, actor: Actor) -> None:
         page: Page = actor.using('page')
+        self.perform_on_page(actor, page)
+
+
+class load_duckduckgo(PlaywrightTask):
+
+    def perform_on_page(self, _, page: Page) -> None:
         page.goto(SearchPage.URL)
 
 
-class search_duckduckgo_for(Task):
+class search_duckduckgo_for(PlaywrightTask):
 
     def __init__(self, phrase: str) -> None:
         super().__init__()
         self.phrase = phrase
     
-    def perform_as(self, actor: Actor) -> None:
-        page: Page = actor.using('page')
+    def perform_on_page(self, _, page: Page) -> None:
         search_page = SearchPage(page)
         search_page.search_input.fill(self.phrase)
         search_page.search_button.click()
 
 
-class verify_page_title_is(Task):
+class verify_page_title_is(PlaywrightTask):
 
     def __init__(self, title: str) -> None:
         super().__init__()
         self.title = title
     
-    def perform_as(self, actor: Actor) -> None:
-        page: Page = actor.using('page')
+    def perform_on_page(self, _, page: Page) -> None:
         expect(page).to_have_title(self.title)
 
 
@@ -52,13 +61,12 @@ class verify_result_link_titles_contain(Task):
         assert len(matches) >= self.minimum
 
 
-class verify_search_result_query_is(Task):
+class verify_search_result_query_is(PlaywrightTask):
 
     def __init__(self, phrase: str) -> None:
         super().__init__()
         self.phrase = phrase
 
-    def perform_as(self, actor: Actor) -> None:
-        page: Page = actor.using('page')
+    def perform_on_page(self, _, page: Page) -> None:
         result_page = ResultPage(page)
         expect(result_page.search_input).to_have_value(self.phrase)
