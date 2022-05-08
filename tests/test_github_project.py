@@ -27,7 +27,6 @@ def test_create_project_card(
 
     # Create a new card
     c_response = gh_actor.calls(create_card(project_column_ids[0], note))
-    assert c_response.json()['note'] == note
 
     # Retrieve the newly created card
     card_id = c_response.json()['id']

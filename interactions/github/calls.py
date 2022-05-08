@@ -37,6 +37,7 @@ class create_card(GitHubProjectCall):
             f'/projects/columns/{self.column_id}/cards',
             data={'note': self.note})
         expect(response).to_be_ok()
+        assert response.json()['note'] == self.note
         return response
 
 
