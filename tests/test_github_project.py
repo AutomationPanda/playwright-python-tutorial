@@ -7,11 +7,9 @@ These tests cover API interactions for GitHub projects.
 # ------------------------------------------------------------
 
 import time
-from venv import create
 
 from interactions.github.calls import *
 from interactions.github.tasks import *
-from playwright.sync_api import APIRequestContext, Page, expect
 from screenplay.pattern import Actor
 
 
