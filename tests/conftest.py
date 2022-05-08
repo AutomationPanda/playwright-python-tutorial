@@ -25,6 +25,12 @@ def actor(page: Page) -> Actor:
     return actor
 
 
+@pytest.fixture
+def gh_actor(actor: Actor, gh_context: APIRequestContext) -> Actor:
+    actor.can_use(gh_context=gh_context)
+    return actor
+
+
 # ------------------------------------------------------------
 # GitHub project fixtures
 # ------------------------------------------------------------
