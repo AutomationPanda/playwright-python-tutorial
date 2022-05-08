@@ -9,7 +9,11 @@ from playwright.sync_api import Page, expect
 from screenplay.pattern import Actor, Task
 
 
-class PlaywrightTask(Task, ABC):
+# ------------------------------------------------------------
+# DuckDuckGo Task parent class
+# ------------------------------------------------------------
+
+class DuckDuckGoTask(Task, ABC):
 
     @abstractmethod
     def perform_on_page(self, actor: Actor, page: Page) -> None:
@@ -20,13 +24,17 @@ class PlaywrightTask(Task, ABC):
         self.perform_on_page(actor, page)
 
 
-class load_duckduckgo(PlaywrightTask):
+# ------------------------------------------------------------
+# DuckDuckGo Tasks
+# ------------------------------------------------------------
+
+class load_duckduckgo(DuckDuckGoTask):
 
     def perform_on_page(self, _, page: Page) -> None:
         page.goto(SearchPage.URL)
 
 
-class search_duckduckgo_for(PlaywrightTask):
+class search_duckduckgo_for(DuckDuckGoTask):
 
     def __init__(self, phrase: str) -> None:
         super().__init__()
@@ -38,7 +46,7 @@ class search_duckduckgo_for(PlaywrightTask):
         search_page.search_button.click()
 
 
-class verify_page_title_is(PlaywrightTask):
+class verify_page_title_is(DuckDuckGoTask):
 
     def __init__(self, title: str) -> None:
         super().__init__()
@@ -61,7 +69,7 @@ class verify_result_link_titles_contain(Task):
         assert len(matches) >= self.minimum
 
 
-class verify_search_result_query_is(PlaywrightTask):
+class verify_search_result_query_is(DuckDuckGoTask):
 
     def __init__(self, phrase: str) -> None:
         super().__init__()

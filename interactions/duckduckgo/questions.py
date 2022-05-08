@@ -8,7 +8,11 @@ from playwright.sync_api import Page
 from screenplay.pattern import Actor, Question, Answer
 
 
-class PlaywrightQuestion(Question[Answer], ABC):
+# ------------------------------------------------------------
+# DuckDuckGo Question parent class
+# ------------------------------------------------------------
+
+class DuckDuckGoQuestion(Question[Answer], ABC):
 
     @abstractmethod
     def request_on_page(self, actor: Actor, page: Page) -> Answer:
@@ -19,7 +23,11 @@ class PlaywrightQuestion(Question[Answer], ABC):
         return self.request_on_page(actor, page)
         
 
-class result_link_titles(PlaywrightQuestion[list[str]]):
+# ------------------------------------------------------------
+# DuckDuckGo Questions
+# ------------------------------------------------------------
+
+class result_link_titles(DuckDuckGoQuestion[list[str]]):
 
     def request_on_page(self, _, page: Page) -> list[str]:
         result_page = ResultPage(page)
