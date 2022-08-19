@@ -189,7 +189,7 @@ Now, it just uses a page object for the search page instead of raw calls.
 
 After writing the search page class, the result page class will be straightforward.
 It will follow the same structure.
-The main difference is that each interaction methods in the result page class will return a value
+The main difference is that each interaction method in the result page class will return a value
 because test assertions will check page values.
 
 Start by adding the following imports for type checking to `pages/result.py`:
@@ -244,11 +244,11 @@ it is concatenated with the N-th element fetcher to wait for at least 5 elements
 The second time it is called,
 it gets all the text contents for the elements it finds.
 
-The second method takes in a search phases and a minimum limit for matches.
+The second method takes in a search phrase and a minimum limit for matches.
 It calls the first method to get the list of titles,
 filters the titles using a list comprehension,
 and returns a Boolean value indicating if the number of matches meets the minimum threshold.
-Notice that this method does **not** perform an asssertion.
+Notice that this method does **not** perform an assertion.
 Assertions should *not* be done in page objects.
 They should only be done in test cases.
 
