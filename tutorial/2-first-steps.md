@@ -178,6 +178,13 @@ Here's the inspection panel for the search input element:
 Thankfully, this element has an ID.
 We can use the selector `#search_form_input_homepage` to uniquely identify this element.
 
+***Warning:***
+DuckDuckGo frequently changes its page structure and performs A/B testing.
+The selectors presented in this tutorial may not work for you.
+Please investigate the page structure and use appropriate selectors.
+For example, you might need to use `[name="q"]` for the search input
+and `[aria-label="Search"]` for the search button.
+
 To interact with elements with Playwright, we must use [locators](https://playwright.dev/python/docs/locators).
 The [Locator](https://playwright.dev/python/docs/next/api/class-locator) class
 takes in a selector and produces an object that can interact with the target element.
