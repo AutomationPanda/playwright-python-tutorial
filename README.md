@@ -3,6 +3,8 @@
 
 # Tutorial: Web Testing with Playwright in Python
 
+*Warning: Many parts of this tutorial have fallen out of date. I hope to update it sometime in the future.*
+
 
 ## Abstract
 
