@@ -9,24 +9,26 @@ This module contains shared fixtures.
 import os
 import pytest
 
-from pages.result import DuckDuckGoResultPage
-from pages.search import DuckDuckGoSearchPage
 from playwright.sync_api import Playwright, APIRequestContext, Page, expect
+from screenplay.pattern import Actor
 from typing import Generator
 
 
 # ------------------------------------------------------------
-# DuckDuckGo search fixtures
+# Screenplay fixtures
 # ------------------------------------------------------------
 
 @pytest.fixture
-def result_page(page: Page) -> DuckDuckGoResultPage:
-    return DuckDuckGoResultPage(page)
+def actor(page: Page) -> Actor:
+    actor = Actor()
+    actor.can_use(page=page)
+    return actor
 
 
 @pytest.fixture
-def search_page(page: Page) -> DuckDuckGoSearchPage:
-    return DuckDuckGoSearchPage(page)
+def gh_actor(actor: Actor, gh_context: APIRequestContext) -> Actor:
+    actor.can_use(gh_context=gh_context)
+    return actor
 
 
 # ------------------------------------------------------------

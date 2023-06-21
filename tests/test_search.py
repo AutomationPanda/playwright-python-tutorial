@@ -4,9 +4,8 @@ These tests cover DuckDuckGo searches.
 
 import pytest
 
-from pages.result import DuckDuckGoResultPage
-from pages.search import DuckDuckGoSearchPage
-from playwright.sync_api import expect, Page
+from interactions.duckduckgo.tasks import *
+from screenplay.pattern import Actor
 
 
 ANIMALS = [
@@ -24,23 +23,19 @@ ANIMALS = [
 
 
 @pytest.mark.parametrize('phrase', ANIMALS)
-def test_basic_duckduckgo_search(
-    phrase: str,
-    page: Page,
-    search_page: DuckDuckGoSearchPage,
-    result_page: DuckDuckGoResultPage) -> None:
+def test_basic_duckduckgo_search(phrase: str, actor: Actor) -> None:
     
     # Given the DuckDuckGo home page is displayed
-    search_page.load()
+    actor.attempts_to(load_duckduckgo())
 
     # When the user searches for a phrase
-    search_page.search(phrase)
+    actor.attempts_to(search_duckduckgo_for(phrase))
 
     # Then the search result query is the phrase
-    expect(result_page.search_input).to_have_value(phrase)
+    actor.attempts_to(verify_search_result_query_is(phrase))
 
     # And the search result links pertain to the phrase
-    assert result_page.result_link_titles_contain_phrase(phrase)
+    actor.attempts_to(verify_result_link_titles_contain(phrase))
 
     # And the search result title contains the phrase
-    expect(page).to_have_title(f'{phrase} at DuckDuckGo')
+    actor.attempts_to(verify_page_title_is(f'{phrase} at DuckDuckGo'))
